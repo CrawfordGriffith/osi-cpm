@@ -1,0 +1,207 @@
+
+TITLE LPTDRV   FORTRAN-80 RUNTIME LINE PRINTER DRIVER
+;
+        ENTRY   LPTDRV,$OPNFL
+        EXT     $IOERR,$BF,$BL,$CLSFL
+;
+ISIS    EQU     0
+CPM     SET     1
+ADDS    EQU     0
+TANDY   EQU     0
+CPMSBC  EQU     0
+IF2
+IFT     ISIS
+.PRINTX/ISIS II VERSION/
+ENDIF
+IFT     CPM
+.PRINTX/CPM VERSION/
+ENDIF
+IFT     ADDS
+.PRINTX/ADDS VERSION/
+ENDIF
+IFT     TANDY
+.PRINTX/CPM RELOCATED TO 4200H (FOR TANDY)/
+ENDIF
+IFT     CPMSBC
+.PRINTX/SBC VERSION/
+ENDIF
+ENDIF
+IFT     TANDY OR CPMSBC
+CPM     SET     1
+ENDIF
+IFT     ADDS
+CPM     SET     1
+ENDIF
+        IFF     ADDS
+CPMENT  SET     5
+        ENDIF
+        IFT     ADDS
+CPMENT  SET     X'1009'
+        ENDIF
+IFT     TANDY
+CPMENT  SET     4205H
+ENDIF
+IFT     CPMSBC
+CPMENT  SET     4005H
+ENDIF
+;
+DSEG
+$OPNFL: DB      0       ;0 IF NOT OPEN
+CLSADR: DS      2
+;
+CSEG
+LPTDRV: DW      LPTERR
+        DW      LPTFWR
+        DW      LPTERR
+        DW      LPTERR
+        DW      LPTERR
+        DW      LPTERR
+        DW      LPTCLS
+;
+LPTCLS: LDA     $OPNFL
+        ORA     A               ;LPT OPEN?
+        JZ      LPTERR          ;NO, ERROR
+        MVI     A,14Q
+        CALL    LPTOUT
+        CALL    LPTCLD
+        XRA     A
+        STA     $OPNFL          ;LPT CLOSED
+        RET
+;
+CLSLPT: LDA     $OPNFL
+        ORA     A                       ;LPT OPEN
+        LHLD    CLSADR          ;OTHER CLOSE ROUTINE
+        PUSH    H
+        RZ                      ;NOT OPEN
+        MVI     A,15Q
+        CALL    LPTOUT
+        MVI     A,12Q
+        JMP     LPTOUT
+;
+SETCLS: LHLD    $CLSFL
+        LXI     D,CLSLPT
+        MOV     A,H
+        SUB     D
+        JNZ     STRADR
+        MOV     A,L
+        SUB     E
+        JZ      STRCLS
+STRADR: SHLD    CLSADR
+STRCLS: XCHG
+        SHLD    $CLSFL
+        RET
+;
+LPTERR: JMP     $IOERR
+;
+LPTFWR: LDA     $OPNFL
+        ORA     A               ;LPT OPEN?
+        CZ      LPTOPN          ;NO, OPEN IT
+        LDA     $BL
+        ORA     A
+        RZ
+        LHLD    $BF
+        DCR     A
+        PUSH    PSW
+        MVI     A,15Q
+        CALL    LPTOUT
+        MOV     A,M
+        CPI     "+"
+        JZ      LPTFW2
+        CPI     "1"
+        JNZ     LPTFW1
+        MVI     A,14Q
+        CALL    LPTOUT
+        JMP     LPTFW2
+;
+LPTFW1: MVI     A,12Q
+        CALL    LPTOUT
+        MOV     A,M
+        CPI     "0"
+        JNZ     LPTFW2
+        MVI     A,12Q
+        CALL    LPTOUT
+LPTFW2: POP     PSW
+        INX     H
+LPTLOP: RZ
+        PUSH    PSW
+        MOV     A,M
+        INX     H
+        CALL    LPTOUT
+        POP     PSW
+        DCR     A
+        JMP     LPTLOP
+;
+        IFT     CPM
+LPTOUT: PUSH    H
+        PUSH    PSW
+        ANI     177Q
+        MOV     E,A
+        MVI     C,5
+        CALL    CPMENT          ;WRITE TO LIST
+        POP     PSW
+        POP     H
+        RET
+LPTOPN: MVI     A,1
+        STA     $OPNFL
+        CALL    SETCLS                  ;SET SO LPT WILL GET CR/LF
+LPTCLD: RET
+        ENDIF
+;
+        IFT     ISIS
+LPTOUT: PUSH    H
+        PUSH    PSW
+        ANI     177Q
+        STA     LCHR
+        LXI     D,LPTBLK
+        MVI     C,4
+        CALL    100Q
+        POP     PSW
+        POP     H
+        RET
+;
+LPTCLD: LXI     H,STAT
+        SHLD    LPTBLK+2
+        LXI     D,LPTBLK
+        MVI     C,1
+        CALL    100Q            ;CLOSE LPT
+        RET
+;
+LPTOPN: LXI     H,AFTN
+        SHLD    LPTBLK
+        CALL    SETCLS
+        LXI     H,LPTNAM
+        SHLD    LPTBLK+2
+        LXI     H,2
+        SHLD    LPTBLK+4
+        LXI     H,0
+        SHLD    LPTBLK+6
+        LXI     H,STAT
+        SHLD    LPTBLK+8
+        MVI     C,0
+        LXI     D,LPTBLK
+        CALL    100Q
+        LHLD    AFTN
+        SHLD    LPTBLK
+        LXI     H,LCHR
+        SHLD    LPTBLK+2
+        LXI     H,1
+        MOV     A,L
+        STA     $OPNFL
+        SHLD    LPTBLK+4
+        LXI     H,STAT
+        SHLD    LPTBLK+6
+        RET
+;
+DSEG
+LPTBLK: DS      10
+CSEG
+LPTNAM: DB      ":LP:",0
+DSEG
+LCHR:   DS      1
+STAT:   DS      2
+AFTN:   DS      2
+CSEG
+        ENDIF
+        END
+
+A>TYPE TEST.MAC

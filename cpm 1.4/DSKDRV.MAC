@@ -1,0 +1,741 @@
+
+TITLE DSKDRV  FORTRAN-80 RUNTIME DISK DRIVER -- CP/M VERSIONS
+;
+;VERSIONS
+CPM     EQU     1               ;CPM VERSION
+ADDS    EQU     0               ;SYSTEM 70
+;
+;
+;DATA AREA
+;
+        ENTRY   $FLBUF,$FLCNT,$FLFLG,$FLFCB,$GTFLG,$GTFCB,$DSKER
+        ENTRY   $MEMRY
+DSEG
+$FLBUF: DS      20              ;POSSIBLE BUFFER FOR EACH UNIT
+$FLCNT: DS      10              ;OFFSET INTO BUFFERS
+$FLFLG: DS      10
+;                               ;&200 IF ALLOCATED BUFFER,FCB
+;                               ;&100 IF FILE OPEN
+;                               ;&40 IF KNOW MODE
+;                               ;&20 IF MODE OUTPUT
+;                               ;&10 IF BINARY/RANDOM
+;                               ;&4 IF BUFFER CHANGED
+$FLFCB: DS      20              ;POINTERS TO FILE BLOCKS
+;
+CSEG
+FILTXT: DB      "FORT",0
+FILEXT: DB      "DAT",0
+DSEG
+RNDFLG: DS      1               ;NON-ZERO = RANDOM
+XTCHGF: DS      1               ;NON-ZERO IF SWITCHING EXTENTS
+$DSKER: DS      1               ;STATUS OF LAST I/O
+CLSADR: DS      2
+$MEMRY: DS      2               ;FOR LOADER TO STORE TOP OF MEM INTO
+;
+        IFT     ADDS
+CPMENT  EQU     1009H           ;CP/M ENTRY POINT
+        ENDIF
+        IFT     CPM
+CPMENT  EQU     5
+        ENDIF
+TOPALC  EQU     $MEMRY
+        EXT     $ERR,$BL,$BF,$UN,$IOERR,$LUNTB,$CLSFL,$REC
+CSEG
+DSKERR: JMP     $IOERR
+;
+;
+;I/O DISPATCH TABLE
+;UNITS 6-10 POINT TO THIS TABLE FROM $LUNTB. A CALL TO OPEN ALLOWS
+;OTHER UNITS TO USE THE DISK TOO.
+        ENTRY   DSKDRV
+DSKDRV: DW      DSKFRD          ;FORMATTED READ
+        DW      DSKFWR          ;FORMATTED WRITE
+        DW      DSKBRD          ;BINARY READ
+        DW      DSKBWR          ;BINARY WRITE
+        DW      DSKREW          ;REWIND
+        DW      DSKERR          ;BACKSPACE
+        DW      DSKCLS          ;ENDFILE
+;
+;ROUTINE TO GET FLAG BYTE FROM $FLFLG FOR UNIT
+$GTFLG: LXI     H,$FLFLG-1
+        LDA     $UN             ;GET UNIT #
+        MVI     D,0
+        MOV     E,A
+        DAD     D               ;[H,L] POINTS TO FLAG
+        MOV     A,M             ;GET FLAG
+        RET
+;
+;ROUTINE TO GET ADR OF FCB IN [D,E]
+$GTFCB: LXI     H,$FLFCB-2
+        LDA     $UN
+        ADD     A
+        MOV     E,A
+        MVI     D,0
+        DAD     D               ;POINT TO ADR OF FCB
+        MOV     E,M
+        INX     H
+        MOV     D,M
+        RET
+;
+;ROUTINE TO CHECK IF FILE OPEN AND ALLOCATED. IF NOT OPEN AND ALLOCATE
+FILOPN: PUSH    PSW             ;SAVE OPEN FOR INPUT OR OUTPUT FLAG
+        XRA     A               ;CLEAR RNDFLG
+        STA     RNDFLG
+        STA     XTCHGF          ;ASSUME NOT CHANGING EXTENTS
+OPNFL1: CALL    $GTFLG          ;GET FLAG
+        ORA     A               ;ALLOCATED BUFFER,FCB?
+        CP      ALCBUF          ;NO, GET SPACE AND SET PTRS
+        ANI     100Q            ;FILE OPEN?
+        MOV     A,M             ;GET FLAG
+        JNZ     CHKRND
+        LDA     $UN             ;GET UNIT #
+        MOV     E,A
+        MVI     D,0
+        LXI     H,$FLCNT-1
+        DAD     D               ;GET ADR OF OFFSET
+        MVI     M,0             ;CLEAR COUNT
+        LHLD    $CLSFL
+        LXI     D,CLSALL
+        MOV     A,H
+        SUB     D
+        JNZ     STRADR          ;NOT US, STORE ROUTINE ADR
+        MOV     A,L
+        SUB     E
+        JZ      STRCLS          ;US, DON'T STORE AGAIN
+STRADR: SHLD    CLSADR
+STRCLS: XCHG
+        SHLD    $CLSFL          ;ON EXIT, CLOSE ALL FILES
+        CALL    $GTFCB          ;GET ADR OF FILE BLOCK
+        LHLD    $REC
+        MOV     A,H
+        ORA     L
+        JZ      OPNFIL          ;NOT RANDOM
+        DCX     H
+        DAD     H
+        POP     PSW                     ;GET R/W FLAG
+        STC                             ;FLAG FOR RANDOM ACCESS
+        PUSH    PSW
+        MOV     A,H                     ;EXTENT
+OPNFIL: LXI     H,12
+        DAD     D
+        MOV     M,A                     ;STORE EXTENT #
+        INX     H
+        MVI     B,20
+        XRA     A
+CLRLOP: MOV     M,A
+        INX     H
+        DCR     B               ;CLEAR OUT FCB
+        JNZ     CLRLOP
+        POP     PSW             ;GET INPUT/OUTPUT FLAG
+        PUSH    PSW
+        JNC     OPNOUT          ;OPEN FOR OUTPUT
+        MVI     C,15            ;OPEN FILE
+        PUSH    D               ;SAVE FCB ADR
+        CALL    SETBUF
+        CALL    CPMENT          ;TRY TO OPEN FILE
+        INR     A               ;ERROR(NOT FOUND)?
+        POP     D               ;RESTORE FCB ADR
+        JNZ     OPNDON          ;NO, FLAG OPEN AND DONE
+        MVI     C,22            ;CREATE FILE
+        CALL    CPMENT          ;MAKE FILE
+        INR     A               ;ERROR(FULL)?
+        JZ      DSKERR          ;CAN'T CREATE
+OPNDON: CALL    $GTFCB
+        LHLD    $REC
+        MOV     A,L
+        ORA     H
+        JZ      OPNDN1                  ;NOT RANDOM
+        MOV     A,L
+        DCR     A
+        ANI     177Q                    ;GET RECORD # WITHIN EXTENT
+        LXI     H,32
+        DAD     D                       ;POINT TO RECORD # FIELD
+        CMP     M                       ;SAME RECORD #?
+        CNZ     FRCRND                  ;NO, MIGHT NEED TO DUMP
+        MOV     M,A                     ;SET RECORD # TO READ/WRITE
+        JNZ     OPNDN3                  ;DON'T FORCE OUT TWICE
+        MOV     D,A                     ;SAVE RECORD #
+        POP     PSW
+        PUSH    PSW
+        CNZ     FRCRND
+        MOV     M,D                     ;SET RECORD # IN CASE WRITTEN
+OPNDN3: XRA     A
+        STA     XTCHGF                  ;CLEAR SO CLOSE CAN DUMP
+        MOV     H,A
+        MOV     L,A                     ;CLEAR [H,L]
+        SHLD    $REC                    ;CLEAR #
+        STC                             ;FLAG IS RANDOM
+OPNDN1: PUSH    PSW             ;SAVE RANDOM FLAG
+        CALL    $GTFLG
+        POP     PSW                     ;GET FLAG BACK
+        POP     D
+        LDA     RNDFLG          ;CHECK IF RANDOM
+        JNC     OPNDN2          ;NOT RANDOM READ/WRITE
+        ORI     10Q             ;FLAG FILE IS RANDOM
+        PUSH    PSW
+        PUSH    H
+        LDA     $UN
+        MOV     E,A
+        MVI     D,0
+        LXI     H,$FLCNT-1
+        DAD     D
+        MOV     M,D             ;CLEAR OFFSET FOR RANDOM
+        POP     H
+        POP     PSW
+OPNDN2: ORI     300Q
+        MOV     M,A             ;SAVE FLAG
+        RET
+
+CHKRND: PUSH    H
+        STA     RNDFLG
+        LHLD    $REC
+        MOV     A,L
+        ORA     H               ;SEE IF RECORD # GIVEN
+        JZ      POPHRT          ;NO, DON'T SWITCH EXTENTS
+        DCX     H
+        DAD     H
+        MOV     C,H             ;EXTENT #
+        CALL    $GTFCB
+        LXI     H,12
+        DAD     D               ;POINT TO EXTENT #
+        MOV     A,C
+        CMP     M               ;SAME EXTENT?
+        JZ      CHKSPC          ;YES, DON'T SWITCH
+CHKRN1: PUSH    H
+        PUSH    PSW
+        CALL    FRCRND          ;FORCE AND FLAG
+        CALL    DSKCLS          ;CLOSE THIS EXTENT
+        POP     PSW
+        POP     H
+        MOV     M,A             ;SET NEW EXTENT #
+        POP     H
+        POP     PSW
+        STC                     ;DON'T EVER DELETE NEXT EXTENT
+        PUSH    PSW
+        JMP     OPNFL1          ;NOW OPEN NEW EXTENT
+
+CHKSPC: LXI     H,32
+        DAD     D               ;POINT TO RECORD #
+        MOV     A,M
+        INR     A               ;LAST RECORD OF EXTENT?
+        JP      SETREC          ;NO, DON'T FORCE
+        CALL    $GTFLG          ;GET FILE FLAGS
+        ANI     4               ;WILL BUFFER BE FORCED OUT?
+        JZ      SETREC          ;NO
+        LHLD    $REC
+        DCX     H
+        MOV     A,L
+        ANI     177Q            ;GET RECORD #
+        INR     A               ;LAST OF EXTENT TOO?
+        JP      SWTEXT          ;NO, FORCE OUT
+        POP     D
+        POP     PSW             ;READ/WRITE FLAG
+        PUSH    PSW
+        PUSH    D
+        JZ      SETREC
+SWTEXT: DAD     H
+        CALL    $GTFCB
+        LXI     H,12
+        DAD     D               ;FOR CHKRN1
+        MOV     A,C             ;GET EXTENT #
+        JMP     CHKRN1          ;FORCE OUT SET NEW EXTENT
+
+POPHRT: POP     H
+        POP     PSW
+        MOV     A,M
+        RET
+
+SETREC: POP     H
+        JMP     OPNDON          ;SET RECORD #
+
+OPNOUT: MVI     C,19
+        CALL    SETBUF
+        CALL    CPMENT          ;DELETE FILE
+        CALL    $GTFLG
+        MVI     M,200Q          ;FILE NOT OPEN
+        POP     PSW
+        STC                     ;OPEN FOR INPUT
+        JMP     FILOPN
+;
+;ROUTINE TO ALLOCATE FCB AND BUFFER FOR UNIT . ALLOCATES UP FROM
+;TOPALC AND STORES PTRS IN TABLE.
+ALCBUF: PUSH    H
+        LHLD    TOPALC          ;GET CURRENT TOP
+        XCHG                    ;IN [D,E]
+        LXI     H,$FLBUF-2
+        LDA     $UN
+        ADD     A
+        MVI     B,0
+        MOV     C,A             ;[B,C]= 2*UNIT#
+        DAD     B               ;GET ADR OF PTR TO BUFFER
+        MOV     M,E
+        INX     H
+        MOV     M,D             ;STORE TOPALC AS ADR
+        LXI     H,128
+        DAD     D               ;GET NEW TOP
+        PUSH    H               ;SAVE FCB ADR
+        CALL    $GTFCB          ;GET [H,L]=ENTRY+1
+        POP     D
+        MOV     M,D
+        DCX     H
+        MOV     M,E             ;STORE ADR OF FCB
+        XCHG                    ;[H,L] POINTS TO FCB
+        MVI     M,0             ;USE CURRENT DRIVE
+        INX     H
+        LXI     D,FILTXT        ;NAME OF DEFAULT FILE
+        LDAX    D
+NM1LOP: MOV     M,A
+        INX     H
+        INX     D
+        LDAX    D
+        ORA     A               ;DONE?
+        JNZ     NM1LOP          ;NO, COPY REST
+        LDA     $UN
+        MOV     B,A             ;SAVE UNIT #
+        SUI     10              ;CARRY SET IF NOT UNIT 10
+        SBB     A
+        ADI     "1"             ;"1" IF 10 ELSE "0"
+        MOV     M,A             ;STORE DIGIT 1 OF #
+        MOV     A,B
+        CPI     10              ;WAS IT 10?
+        JC      SKPSTZ          ;NO, DON'T SET ZERO
+        XRA     A
+SKPSTZ: ADI     "0"             ;GET 2ND DIGIT
+        INX     H
+        MOV     M,A
+        MVI     A,40Q
+        INX     H
+        MOV     M,A
+        INX     H
+        LXI     D,FILEXT-1      ;EXTENSION
+NM2LOP: MOV     M,A
+        INX     H
+        INX     D
+        LDAX    D
+        ORA     A               ;DONE?
+        JNZ     NM2LOP          ;NO,COPY REST
+        MOV     M,A             ;CLEAR EXTENT #
+        LXI     D,21
+        DAD     D               ;GET NEW TOP OF ALLOC
+        SHLD    TOPALC          ;STORE AWAY
+        POP     H               ;GET PTR TO FLAG
+        MVI     A,200Q          ;ALLOCATED
+        MOV     M,A             ;SET FLAG
+        MOV     D,H
+        MOV     E,L
+        LXI     B,-10
+        DAD     B               ;GET PTR TO $FLCNT
+        MVI     M,0             ;CLEAR OFFSET
+        XCHG
+        RET
+;
+;ENDFILE UNIT #
+;
+DSKCLS: CALL    $GTFLG
+        ADD     A               ;OPEN?
+        JP      DSKERR          ;NO,ERROR
+        MVI     M,200Q          ;FLAG CLOSED NOW
+        ADD     A               ;DONE I/O?
+        JP      CLOSIN          ;NO, RELEASES
+        ADD     A               ;OUTPUT FILE?
+        CM      FRCBUF          ;YES, DUMP LAST IF NEEDED
+CLOSIN: CALL    $GTFCB          ;GET ADR OF FCB
+        MVI     C,16
+        CALL    SETBUF          ;SET DMA ADR
+        PUSH    D
+        CALL    CPMENT          ;CLOSE FILE
+        XRA     A               ;NEVER AN ERROR
+        POP     D
+        LXI     H,12
+        DAD     D
+        MOV     M,A             ;CLEAR EXTENT #
+        RET
+;
+;REWIND UNIT #
+;
+DSKREW: CALL    $GTFLG
+        ANI     100Q            ;FILE OPEN?
+        CNZ     DSKCLS          ;YES, CLOSE IT
+        XRA     A               ;GOOD RETURN
+        RET
+;
+;BINARY WRITE
+;
+DSKBWR: XRA     A               ;FLAG OUTPUT FILE
+        CALL    FILOPN          ;OPEN IF NOT OPEN
+        ANI     317Q
+        ORI     50Q
+        MOV     M,A
+        LHLD    $BF             ;GET BUFFER ADR
+        PUSH    H
+        XCHG
+        LHLD    $BL             ;GET LENGTH OF DATA
+        MVI     H,0             ;# OF BYTES
+        XCHG
+        DAD     D               ;PTR TO 1ST TO CLEAR
+        XRA     A
+        DCR     E
+DSKWCL: INR     E               ;CLEARED REST OF BUFFER?
+        JM      DSKBW1          ;YES, DONE
+        MOV     M,A
+        INX     H
+        JMP     DSKWCL          ;CLEAR END OF BUFFER
+;
+DSKBW1: POP     D               ;GET BUFFER ADR
+        MVI     C,26
+        CALL    CPMENT          ;SET ADR OF BUFFER
+        CALL    $GTFCB
+        MVI     C,21
+        CALL    CPMENT          ;WRITE RECORD
+        ORA     A               ;ERROR?
+        RZ                      ;NO, GOOD RETURN
+        STC
+        RET
+;
+;BINARY READ
+;
+DSKBRD: STC                     ;FLAG INPUT FILE
+        SBB     A               ;SET NON-ZERO TOO
+        CALL    FILOPN          ;OPEN IF NEEDED
+        ANI     317Q
+        ORI     70Q
+        MOV     M,A
+        LHLD    $BF
+        MVI     C,26
+        XCHG
+        CALL    CPMENT          ;SET BUFFER ADR
+        CALL    $GTFCB          ;GET ADR OF FCB
+        MVI     C,20
+        MVI     A,128
+        STA     $BL             ;ALWAYS 1 SECTOR
+        CALL    CPMENT          ;READ DATA INTO $BF
+        ORA     A               ;EOF OR GOOD
+        RZ
+        CPI     2
+        CMC
+        RET
+;
+;FORMATTED WRITE
+;
+DSKFWR: XRA     A               ;FLAG OUTPUT FILE
+        CALL    FILOPN          ;OPEN FILE IF NEEDED
+        XRA     A
+        STA     $DSKER          ;CLEAR COUNT
+        LDA     $BL             ;GET # TO WRITE
+        ORA     A
+        RZ                      ;IGNORE NULL BUFFERS
+        PUSH    H               ;SAVE PTR TO FLAGS
+        LHLD    $BF             ;BASE OF RECORD
+        XTHL                    ;SAVE $BF, GET FLAG PTR
+        MOV     A,M
+        ANI     20Q
+        PUSH    PSW
+        MOV     A,M
+        ANI     317Q
+        ORI     64Q
+        MOV     M,A
+        POP     PSW
+        LDA     $BL
+        POP     H               ;GET BACK $BF
+        PUSH    PSW             ;SAVE LENGTH
+        MOV     A,M             ;GET CARRIAGE CONTROL BYTE
+        CPI     "+"             ;OVERPRINT?
+        JZ      DSKFW2
+        CPI     "1"             ;FORM FEED?
+        JNZ     DSKFW1          ;NO
+        MVI     A,14Q
+        CALL    DSKOUT
+        JMP     DSKFW2
+;
+DSKFW1: CPI     "0"             ;DOUBLE SKIP?
+        MVI     A,12Q
+        CZ      DSKOUT
+        POP     PSW             ;GET 1ST TIME FLAG
+        PUSH    PSW
+        MVI     A,12Q
+        CNZ     DSKOUT
+DSKFW2: POP     PSW             ;GET # LEFT TO DUMP
+        INX     H
+        DCR     A               ;DECR. COUNT
+        JZ      DSKWDN          ;DONE
+        PUSH    PSW             ;SAVE COUNT
+        MOV     A,M
+        CALL    DSKOUT          ;SEND OUT BYTE
+        JMP     DSKFW2
+;
+DSKWDN: MVI     A,15Q
+        CALL    DSKOUT          ;PUT OUT <CR>
+        LDA     $DSKER          ;GET $DSKEROR STATUS
+        ORA     A               ;ERROR?
+        RZ                      ;NO
+        STC                     ;YES
+        RET
+;
+FRCRND: PUSH    PSW
+        LDA     XTCHGF
+        ORA     A               ;CALLED AFTER SWITCHING EXTENTS?
+        JNZ     POPART          ;YES, DON'T DUMP AGAIN
+        PUSH    H
+        PUSH    D
+        CALL    $GTFLG          ;GET FLAG BYTE
+        ANI     4               ;RANDOM BUFFER CHANGED?
+        CNZ     FRCOUT          ;YES, FORCE BUFFER OUT
+        CALL    $GTFLG
+        STA     RNDFLG
+        POP     D
+        POP     H
+        INR     A               ;FORCE NON-ZERO
+        STA     XTCHGF          ;SET FLAG
+POPART: POP     PSW
+        RET
+;
+;FORMATTED READ
+;
+DSKFRD: STC                     ;FLAG INPUT FILE
+        SBB     A               ;SET NON-ZERO TOO
+        CALL    FILOPN          ;OPEN IF NEEDED
+        ANI     317Q
+        ORI     40Q
+        MOV     M,A
+        XRA     A
+        STA     $BL             ;CLEAR LENGTH OF RECORD
+        STA     $DSKER          ;CLEAR $DSKEROR
+DSKFR1: CALL    DSKIN           ;GET CHAR
+        JC      DSKRDN          ;JUMP IF EOF
+        CPI     32Q             ;CP/M EOF?
+        JZ      DSKEOF          ;YES
+        PUSH    PSW             ;SAVE CHAR
+        LHLD    $BL
+        MVI     H,0
+        XCHG
+        LHLD    $BF             ;BASE
+        DAD     D               ;GET WHERE TO PUT BYTE
+        POP     PSW             ;GET CHAR BACK
+        MOV     M,A             ;STORE CHAR
+        INX     D               ;BUMP OFFSET
+        XCHG
+        SHLD    $BL             ;UPDATE OFFSET
+        CPI     15Q             ;<CR>?
+        JZ      DSKRDN          ;YES, HAVE RECORD
+        MOV     A,L             ;GET OFFSET
+        CPI     128             ;BUFFER FULL?
+        JC      DSKFR1          ;NO, GET NEXT
+        CALL    $ERR            ;RUNTIME ERROR
+        DB      22Q             ;IRECER
+        XRA     A
+        RET
+;
+DSKRDN: LDA     $DSKER          ;GET STATUS
+        ORA     A
+        RZ                      ;NO ERROR
+        CPI     2
+        CMC
+        RET
+DSKEOF: ORA     A               ;SET CC'S
+        RET
+;
+;DISK INPUT ROUTINE
+;
+DSKIN:  LXI     H,$FLCNT-1
+        LDA     $UN
+        MVI     D,0
+        MOV     E,A
+        DAD     D
+        MOV     A,M             ;GET $FLCNT ENTRY
+        ORA     A               ;BUFFER EMPTY?
+        CZ      REDBUF          ;YES, REFIL
+        RC                      ;EOF
+        DCR     M               ;DECR. # LEFT
+        LXI     H,$FLBUF-2
+        DAD     D
+        DAD     D               ;GET $FLBUF PTR
+        CMA
+        ADI     129             ;128-#LEFT=OFFSET
+        ADD     M
+        MOV     E,A
+        INX     H
+        MVI     A,0
+        ADC     M
+        MOV     D,A
+        LDAX    D               ;GET CHAR
+        ORA     A
+        RET
+;
+;READ BUFFER FROM DISK
+;
+REDBUF: PUSH    H
+        PUSH    D
+        CALL    SETBUF
+        CALL    $GTFCB
+        MVI     C,20
+        CALL    CPMENT          ;READ DATA
+        STA     $DSKER          ;STORE STATUS
+        ORA     A
+        POP     D
+        POP     H
+        MVI     A,128           ;FULL BUFFER
+        MOV     M,A             ;STORE COUNT
+        RZ                      ;IF NO ERROR
+        STC
+        RET
+;
+;DISK OUTPUT ROUTINE
+;
+DSKOUT: PUSH    H
+        PUSH    PSW
+        LXI     H,$FLCNT-1
+        LDA     $UN
+        MVI     D,0
+        MOV     E,A
+        DAD     D
+        MOV     A,M             ;GET OFFSET
+        ORA     A               ;BUFFER FULL?
+        CM      DMPBUF          ;YES, DUMP
+        INR     M
+        LXI     H,$FLBUF-2
+        DAD     D
+        DAD     D               ;POINT TO ADR OF BUFFER
+        ADD     M
+        MOV     E,A
+        INX     H
+        MVI     A,0
+        ADC     M
+        MOV     D,A             ;POINTS TO FREE
+        POP     PSW             ;GET CHAR BACK
+        STAX    D               ;STORE CHAR
+        POP     H
+        RET
+;
+;ROUTINE TO FORCE BUFFER OUT ON CLOSE
+;
+FRCBUF: ADD     A               ;BINARY I/O?
+        JM      FRCOUT          ;YES, FORCE OUT LAST IF NEEDED
+        MVI     A,15Q
+        CALL    DSKOUT
+        MVI     A,12Q
+        CALL    DSKOUT          ;FORCE END OF LINE
+        MVI     A,32Q
+        CALL    DSKOUT          ;SET END OF FILE
+FRCOUT: LXI     H,$FLCNT-1
+        LDA     $UN
+        MVI     D,0
+        MOV     E,A
+        DAD     D
+        MOV     A,M             ;GET OFFSET
+        ORA     A               ;EMPTY?
+        MVI     M,0             ;CLEAR OFFSET
+        RZ                      ;YES, DO NOTHING
+        PUSH    PSW             ;SAVE OFFSET
+        CALL    GETBUF          ;GET BUFFER ADR
+        POP     PSW
+        MOV     L,A
+        MVI     H,0
+        DAD     D               ;POINT TO 1ST UNUSED
+CHKFIL: ORA     A               ;SET MINUS IF FULL
+        JM      DMPBF1          ;NOTHING TO FILL
+        MVI     M,0             ;CLEAR BYTE
+        INX     H
+        INR     A               ;BUMP OFFSET
+        JMP     CHKFIL
+;
+;ROUTINE TO DUMP BUFFER TO DISK
+;
+DMPBF1: DCX     H               ;SO THAT DRIVE # ISN'T CLEARED
+DMPBUF: PUSH    H
+        PUSH    D
+        CALL    SETBUF
+        CALL    $GTFCB
+        MVI     C,21
+        CALL    CPMENT          ;WRITE BUFFER
+        STA     $DSKER          ;STORE STATUS
+        CALL    $GTFLG
+        ANI     373Q            ;MASK OUT CHANGED FLAG
+        MOV     M,A             ;CLEAR FLAG
+        POP     D
+        POP     H
+        XRA     A
+        MOV     M,A
+        RET
+;
+;ROUTINE TO CLOSE ALL FILES. CALLED FROM EXIT
+;
+CLSALL: LXI     D,1
+CLSAL1: LXI     H,$FLFLG-1
+        DAD     D
+        MOV     A,M
+        ADD     A               ;SET MINUS IF OPEN
+        PUSH    D               ;SAVE UNIT #
+        MOV     A,E
+        STA     $UN             ;SET UP FOR OTHERS
+        CM      DSKCLS          ;CLOSE FILE IF OPEN
+        POP     D               ;GET # BACK
+        INX     D               ;BUMP IT
+        MOV     A,E
+        CPI     11              ;DONE ALL?
+        JNZ     CLSAL1          ;NO, DO NEXT
+        RET                     ;RETURN
+;
+;CALL OPEN(UNIT #,FILENAME,DRIVE #)
+;
+        ENTRY   OPEN
+        EXT     $IOINIT
+OPEN:   MOV     A,M             ;GET UNIT #
+        CPI     11                      ;TOO BIG
+        JNC     DSKERR          ;YES
+        STA     $UN             ;SET IT UP
+        PUSH    D               ;SAVE REGISTERS
+        PUSH    B               ;SAVE FILPTR
+        CALL    $IOINIT         ;INITIALIZE IF NOT ALREADY DONE
+        CALL    $GTFLG
+        ORA     A               ;ALLOCATED?
+        CP      ALCBUF          ;NO, ALLOCATE
+        POP     B
+        CALL    $GTFCB
+        XCHG
+        POP     D               ;[D,E]=NAME PTR
+        LDAX    B               ;GET DRIVE #
+        MOV     M,A             ;STORE DRIVE #
+        MVI     B,11            ;# TO COPY
+FILLOP: LDAX    D
+        ORA     A               ;NULL BYTE?
+        JZ      FILLEN          ;YES, LEAVE REST AS BEFORE
+        INX     D
+        INX     H
+        MOV     M,A
+        DCR     B               ;DONE COPY?
+        JNZ     FILLOP          ;NO, DO REST
+FILLEN: LDA     $UN             ;GET UNIT #
+        ADD     A               ;WORD TABLE
+        MVI     D,0
+        MOV     E,A             ;[D,E]= OFFSET
+        LXI     H,$LUNTB
+        DAD     D               ;POINT TO HIGH OF ADR
+        LXI     B,DSKDRV        ;ADR OF DISPATCH TABLE
+        MOV     M,B
+        DCX     H
+        MOV     M,C             ;NOW A DISK FILE
+        RET
+;
+SETBUF: PUSH    B
+        PUSH    D
+        CALL    GETBUF          ;GET BUFFER ADR
+        MVI     C,26
+        CALL    CPMENT          ;SET BUFFER ADR
+        POP     D
+        POP     B
+        RET
+;
+GETBUF: LDA     $UN
+        ADD     A
+        MOV     E,A
+        MVI     D,0
+        LXI     H,$FLBUF-2
+        DAD     D
+        MOV     E,M
+        INX     H
+        MOV     D,M
+        RET
+;
+        END
+
+A>

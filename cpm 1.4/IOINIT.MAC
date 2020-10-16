@@ -1,0 +1,195 @@
+TYPE IOINIT.MAC
+TITLE IOINIT    I/O FLAG AND VARIABLE INITIALIZATION
+        CPM     EQU     1
+        ZILOG   EQU     0
+        TEK     EQU     0               ;TEKTRONIX
+        ISIS    EQU     0
+        DTC     EQU     0
+        MITS    EQU     0
+        SORD    EQU     0
+        ISC     EQU     0
+IF2
+.PRINTX/IOINIT/
+IFT     CPM
+.PRINTX/CPM VERSION/
+ENDIF
+IFT     ZILOG
+.PRINTX/ZILOG MCZ VERSION/
+ENDIF
+IFT     TEK
+.PRINTX/TEKTRONIX VERSION/
+ENDIF
+IFT     ISIS
+.PRINTX/ISIS II VERSION/
+ENDIF
+IFT     DTC
+.PRINTX/DTC VERSION/
+ENDIF
+IFT     MITS
+.PRINTX/MITS VERSION/
+ENDIF
+IFT     SORD
+.PRINTX/SORD VERSION/
+ENDIF
+IFT     ISC
+.PRINTX/ISC VERSION/
+ENDIF
+ENDIF
+;
+        ENTRY   $IOINI
+        EXT     $IOFLG
+;
+        IFT     CPM OR DTC
+        EXT     $LNPTR,$CPMBF,$LINBF
+        ENDIF
+IFT     ZILOG
+        EXT     $LNPTR,$LINBF,$INLUN,$INCOD,$OTLUN,$OTREQ
+ENDIF
+        IFT     CPM OR MITS OR ISIS OR DTC OR ZILOG
+        EXT     $LUNTB,$FLFLG,$DSKER
+        ENDIF
+IFT     ISC
+        EXT     $LUNTB,$FLFLG
+ENDIF
+IFT     TEK
+        EXT     $FLFLG,$DSKER
+ENDIF
+        IFT     MITS
+        EXT     $TTYLN,$LINBF,$LNPTR,$OUTBL,$TOCHR,$ARGBK
+        ENDIF
+        IFT     DTC
+        EXT     $COMBF,$COMLN,$COMPT
+        ENDIF
+        IFT     CPM OR ISIS
+        EXT     $OPNFL
+        ENDIF
+        IFT     ISIS OR ISC
+        EXT     $LNPTR,$LNBUF
+        ENDIF
+;
+IFT     TEK
+        EXT     $LNPTR
+$LNBUF  EQU     50H
+ENDIF
+;
+$IOINI:
+        LDA     $IOFLG          ;SEE IF WE'VE ALREADY BEEN CALLED
+        ORA     A
+        RNZ
+        INR     A
+        STA     $IOFLG
+IFT     TEK OR ISC
+        LXI     H,$LNBUF
+        SHLD    $LNPTR          ;INITIALIZE TTY I/O
+        MVI     M,13            ;PUT A CR IN BUFFER TO FORCE READ
+ENDIF
+        IFT     CPM OR DTC
+        LXI     H,$CPMBF                ;INITIALIZE TTY I/O
+        MVI     M,80
+        INX     H
+        MVI     M,0
+        INX     H
+        SHLD    $LNPTR
+        MVI     M,12Q
+        ENDIF
+        IFT     ISIS
+        LXI     H,$LNBUF
+        MVI     M,12Q
+        SHLD    $LNPTR
+        ENDIF
+IFT     ZILOG
+        LXI     H,$LINBF
+        MVI     M,15Q
+        SHLD    $LNPTR
+        MVI     A,1
+        STA     $INLUN
+        INR     A
+        STA     $OTLUN
+        MVI     A,0CH
+        STA     $INCOD
+        MVI     A,10H
+        STA     $OTREQ
+ENDIF
+        IFT     MITS
+        LXI     H,$TTYLN
+        MVI     M,102Q
+        INX     H
+        MVI     M,0
+        INX     H
+        MVI     M,101Q
+        INX     H
+        MVI     M,2
+        INX     H
+        LXI     D,$LINBF
+        MOV     M,E
+        INX     H
+        MOV     M,D
+        INX     H
+        MVI     M,80
+        INX     H
+        MVI     M,0
+        LXI     H,$LINBF
+        MVI     M,12Q
+        SHLD    $LNPTR
+        LXI     H,$OUTBL
+        MVI     M,103Q
+        INX     H
+        MVI     M,0
+        INX     H
+        MVI     M,101Q
+        INX     H
+        MVI     M,0
+        INX     H
+        LXI     D,$TOCHR
+        MOV     M,E
+        INX     H
+        MOV     M,D
+        INX     H
+        MVI     M,1
+        INX     H
+        MVI     M,0
+        XRA     A
+        STA     $TOCHR
+        ENDIF
+;
+        IFT     DTC
+        LXI     H,$COMBF                ;INITIALIZE COM I/O
+        MVI     M,80
+        INX     H
+        MVI     M,0
+        INX     H
+        MVI     M,12Q
+        SHLD    $COMPT
+        ENDIF
+;
+        IFT     CPM OR MITS OR ISIS OR DTC OR ZILOG OR TEK OR ISC
+IFF     TEK
+        LDA     $LUNTB                  ;GET # OF LUN'S
+        DCR     A
+        MOV     B,A                     ;SAVE IT
+ENDIF
+IFT     TEK
+        MVI     B,6                     ;6 LUN'S FOR TEK DISKDRV
+ENDIF
+        LXI     H,$FLFLG                ;INITIALIZE FLAGS FOR DSKDRV
+        XRA     A
+FLGLOP: MOV     M,A
+        INX     H                       ;INCREMENT PTR
+        DCR     B                       ;DECREMENT COUNT
+        JNZ     FLGLOP                  ;NEXT
+IFF     ISC
+        STA     $DSKER
+ENDIF
+IFT     MITS
+        STA     $ARGBK
+ENDIF
+        ENDIF
+;
+        IFT     CPM OR ISIS
+        XRA     A
+        STA     $OPNFL                  ;FOR LPTDRV
+        ENDIF
+        RET
+        END
+
+A>
