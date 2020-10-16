@@ -32,7 +32,7 @@ OSI CP/M 1.4
 
 	The first version of CP/M on the C3 used both the 6502 and Z80 
 	processors.  The 6502 handled the hardware for input/output like
-	serial ports and disk controller, while the Z80 did most of the
+	disk controller, while the Z80 did serial I/O and all of rest of the
 	processing.  While this showed off the co-operative processing of
 	multiple different processors, it was inefficient and slow.
 	
