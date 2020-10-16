@@ -7,9 +7,11 @@ and modified as necessary.
 
 Description of files in this folder:
 
-CPM.MAN
+CPM.MAN (originally named CP/M.MAN)
 
-	Mini-manual for CP/M 1.4 (text file)
+	Mini-manual for CP/M 1.4 (text file).  Interesting note on the SAVE
+	command: load data into RAM from another OS (presumably OS65D), cold 
+	boot into CP/M and use SAVE to move the RAM data to disk.
 	
 DSKDRV.MAC
 
