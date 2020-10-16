@@ -1,9 +1,10 @@
 # osi-cpm
  Files for the OSI CP/M operating system
  
- This is my repository of CP/M files from my OSI Challenger 3-OEM
+This is my repository of CP/M files from my OSI Challenger 3-OEM
 
 The folders are:
+
 	apps 	- applications not specific to the CP/M release
 	cpm 1.4	- files and sources for OSI CP/M 1.4
 	cpm 2.2	- files and sources for OSI CP/M 2.2
@@ -15,6 +16,7 @@ am attempting to both share what I have, as well as have a place to
 reverse-engineer the parts that have no source code.
 
 A little bit about the OSI Challenger 3:
+
 	The OSI Challenger 3 was an unusual machine.  While most of the
 	OSI systems were based on the 6502 processor, the Challenger 3 had
 	three CPU's: a 6502, a 6800, and a Z80.  The system boots with the
@@ -27,6 +29,7 @@ A little bit about the OSI Challenger 3:
 CP/M on the OSI came in two versions
 
 OSI CP/M 1.4
+
 	The first version of CP/M on the C3 used both the 6502 and Z80 
 	processors.  The 6502 handled the hardware for input/output like
 	serial ports and disk controller, while the Z80 did most of the
@@ -34,6 +37,7 @@ OSI CP/M 1.4
 	multiple different processors, it was inefficient and slow.
 	
 OSI CP/M 2.2
+
 	The second version of CP/M for the C3 did not use the 6502 for 
 	I/O, and was therefore faster.  In addition, CP/M 2.x was the most
 	popular CP/M version in use at the time.  This CP/M version sets
@@ -41,6 +45,7 @@ OSI CP/M 2.2
 	
 	
 OSI CP/M disk formats (To be completed)
+
 	Since CP/M was very popular at the time, one might think that the OSI
 	C3 could exchange disk media with other CP/M machines of the day.  Not
 	the case unfortunately - OSI chose to make their CP/M more compatible
