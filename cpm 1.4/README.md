@@ -41,3 +41,6 @@ ZBIOS.ASM
 	OSI hardware (tty, centronics).  Most of the calls are to the 6502 with
 	associated code to do the software processor swap.
 
+CPM_V14_6502_bootloader (disassembly by Mark Spankus)
+
+OSI CPM uses track 0 to boot/load 6502 code, & tiny Z80 code which jumps right back to 6502 to load CPM, track 1 contains CPM core.  Track 2 contains the CPM directory, so is the start of a CPM disk (logical block 0) from what I can tell. (Floppy Track 0 = CPM Track 1) One OSI track has 26 CPM disk blocks.
