@@ -1,0 +1,72 @@
+DU
+
+DISK UTILITY ver 7.51
+Universal Version
+
+Type ? for help
+Type X to exit
+
+:?
+Operands in brackets [...] are optional
+Numeric values: 'n' are decimal, 'x' hex
+
++[n]   step in [n] sectors;
+-[n]   step out [n] sectors
+#      print disk parameters for curr drive.
+=xxx   search for ASCII xxx from curr sector.
+       Caution: upper/lower case matters.
+       Use <xx> for hex:
+       To find "IN 0" use: =<db><0>     or
+       "(tab)H,0(CR)(LF)" use: =<9>H,0<D><A>
+<      save current sector into mem. buff.
+>      restore saved sector
+?      give help
+A[ff,tt] ASCII dump
+
+(Type any char. to continue)
+
+C      Change:
+       CHaddr,byte,byte... (hex)
+  or   CAaddr,data...  (Ascii)
+       <xx> Allowed for imbedded hex.
+  or   CHfrom-thru,byte  e.g. ch0-7f,e5
+  or   CAfrom-thru,byte
+D[ff,tt] Dump (hex+ASCII)
+Fn.t   Find file
+Gnn    CP/M Allocation Group nn
+H[ff,tt]       hex dump
+L      Log in drive
+Lx     Log in drive x
+M[nn]  Map [from group nn]
+
+(Type any char. to continue)
+
+N      New disk
+P      Toggle printer switch
+Q      Quiet mode (no msgs)
+R      Read current sector
+Snn    Sector nn
+Tnn    Track nn
+Unn    Set User nn for Find command (CP/M-2 only)
+V[nn]  View [nn] ASCII sectors
+W      Write current sector
+X      Exit program
+Z[nn]  Sleep [nn tenths]
+/[nn]  Repeat [nn (decimal) times]
+
+(Type any char. to continue)
+
+Cancel a function with C or Ctl-C.
+Suspend output with S or Ctl-S.
+Separate commands with ";".
+       Example: g0
+       +;d;z#20;/
+       would step in, dump, sleep 2 sec, 
+       and repeat until control-c typed.
+All "nn" usage except "/", "T", and "S" are
+        HEX.  Use #nn for decimal.
+
+See DU.DOC for complete examples.
+
+
+:

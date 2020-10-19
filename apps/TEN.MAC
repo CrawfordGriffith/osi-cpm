@@ -1,0 +1,227 @@
+TYPE TEM^HN.MAC
+TEMN.MAC?
+
+A>TYPE TEN.MAC
+        ENTRY   BEG
+;
+BEG:    MVI     D,5                     ;STOP ON ^E
+        XRA     A
+        LXI     H,FILFCB
+        MVI     B,33
+CLOP:   MOV     M,A
+        INX     H
+        DCR     B
+        JNZ     CLOP
+        LXI     SP,STACK
+        LHLD    1
+        LXI     D,9
+        DAD     D
+        SHLD    OUTCHR
+        SHLD    MOD1+1          ;STUFF ADDR INTO CALL
+;INITIALIZE MITS I/O BOARD ON PORTS 22,23
+        MVI     A,3
+        OUT     22Q
+        MVI     A,25Q
+        OUT     22Q
+        MVI     D,5
+        CALL    TRMLOP                  ;BE A TERMINAL
+        LXI     H,FILMSG                ;'FILE: '
+        CALL    TXTPRT                  ;PRINT MESSAGE
+        LXI     H,FILFCB
+        MVI     M,1                     ;USE CURRENT DRIVE
+        INX     H
+        MVI     B,11
+        MVI     A," "
+CLRLOP: MOV     M,A
+        INX     H
+        DCR     B                       ;CLEAR TO SPACES
+        JNZ     CLRLOP
+        LXI     H,FILFCB+1
+        MVI     B,11
+GETNML: CALL    TTYIN
+        CPI     15Q
+        JZ      NAMDON
+        CPI     "."                     ;EXTENSION?
+        JNZ     GETNM1                  ;NO
+        LXI     H,FILFCB+1+8            ;POINT TO EXTENSION
+        JMP     GETNML                  ;GET NEXT CHAR
+GETNM1: MOV     M,A
+        INX     H
+        DCR     B
+        JNZ     GETNML
+NAMDON: MVI     C,23Q
+        LXI     D,FILFCB
+        CALL    5
+        MVI     C,26Q
+        LXI     D,FILFCB
+        CALL    5
+        MVI     C,17Q
+        LXI     D,FILFCB
+        CALL    5                       ;OPEN FILE
+        INR     A                       ;ERROR?
+        JZ      0                       ;ABORT
+        MVI     D,15Q                   ;STOP ON <CR>
+        CALL    TRMLOP                  ;SEND COMMAND
+        LXI     H,BOTBUF                ;BOTTOM OF BUFFER
+WLOOP:  IN      22Q
+        ANI     1
+        JZ      WLOOP
+        IN      23Q
+SCHK:   LXI     B,129                   ;SETUP
+XFRLOP: IN      22Q
+        ANI     1                       ;CHAR READY?
+        JNZ     GOTCHR                  ;YES, GET IT
+        IN      0
+        ANI     1                       ;CHAR FROM CONSOLE?
+        JZ      ENDXFR                  ;YES, DONE
+        JMP     XFRLOP
+GOTCHR: IN      23Q
+        MOV     M,A
+;       PUSH    PSW
+        PUSH    H
+        PUSH    B               ;SAVE BC
+;       LXI     B,RETADR
+;       PUSH    B
+;       ANI     177Q
+        MOV     C,A
+;       LHLD    OUTCHR
+;       PCHL
+MOD1:   CALL    XFRLOP
+RETADR: POP     B
+        POP     H
+;       POP     PSW
+        XRA     B
+        MOV     B,A             ;UPDATE
+        INX     H
+        DCR     C                       ;TIME FOR CHECKSUM
+        JNZ     XFRLOP                  ;LATER ADD CHECK FOR FULL
+        DCX     H
+        MOV     A,B
+        ORA     A
+        CZ      DMPBUF
+        MVI     A,101Q
+        JZ      SCHR
+        LXI     B,5000                  ;WAIT LOOP
+WAIT:   XTHL                            ;USE LONGEST INSTRUCTION
+        XTHL
+        XTHL
+        XTHL
+        XTHL
+        XTHL
+        DCX     B
+        MOV     A,B
+        ORA     C
+        JNZ     WAIT
+        MVI     A,3                     ;RE - INITIALIZE I/O PORT
+        OUT     22Q
+        MVI     A,25Q
+        OUT     22Q
+        MVI     A,102O                  ;NACK
+SCHR:   OUT     23Q
+        LXI     H,BOTBUF
+        JMP     SCHK
+;TERMINAL LOOP
+TRMLOP: IN      0
+        ANI     1
+        JNZ     TRMLP1                  ;NOT READY
+        IN      22Q                     ;-10 STATUS
+        ANI     2                       ;SEND CHAR NOW?
+        JZ      TRMLP1                  ;NO, WAIT UNTIL READY
+        IN      1
+        ANI     177Q
+        OUT     23Q                     ;SEND TO -10
+        CMP     D                       ;TERMIN CHAR?
+        RZ                              ;YES, RETURN
+TRMLP1: IN      22Q
+        ANI     1                       ;-10 HAVE CHAR?
+        JZ      TRMLOP                  ;NO, WAIT
+FOO:    IN      0
+        ANI     80H
+        JNZ     FOO
+        IN      23Q
+        ANI     177Q
+        LXI     H,TRMLOP
+        PUSH    H
+        CPI     1
+        RZ
+        CPI     11H
+        RZ
+        CPI     12H
+        RZ
+        CPI     1AH
+        RZ
+        LHLD    OUTCHR
+        MOV     C,A
+        PCHL
+;
+;
+FILMSG: DB      15Q
+        DB      12Q
+        DB      "FILE: "
+        DB      0
+;
+FILFCB: DS      33
+;
+TXTPRT: MOV     A,M
+        ORA     A
+        RZ
+        CALL    TTYOUT
+        INX     H
+        JMP     TXTPRT
+;
+ENDXFR: JMP     DMPDON
+DMPBUF: PUSH    PSW
+        LXI     D,BOTBUF
+        MVI     C,32Q
+        CALL    5
+        LXI     D,FILFCB
+        MVI     C,25Q
+        CALL    5
+        POP     PSW
+        RET
+;
+DMPDON: LXI     D,FILFCB
+        MVI     C,20Q
+        CALL    5                       ;CLOSE FILE
+        JMP     0                       ;BACK TO CP/M
+TTYOUT: PUSH    H
+        PUSH    D
+        PUSH    B
+        PUSH    PSW
+        ANI     7FH                     ;GET RID OF HIGH BIT
+        CPI     1
+        JZ      TTOUT1                  ;DON'T SCREW UP TEI SCREEN
+        CPI     11H
+        JZ      TTOUT1
+        CPI     12H
+        JZ      TTOUT1
+        CPI     1AH
+        JZ      TTOUT1
+        MVI     C,2
+        MOV     E,A
+        CALL    5
+TTOUT1: POP     PSW
+        POP     B
+        POP     D
+        POP     H
+        RET
+;
+TTYIN:  PUSH    B
+        PUSH    D
+        PUSH    H
+        MVI     C,1
+        CALL    5
+        POP     H
+        POP     D
+        POP     B
+        CPI     3
+        JZ      0
+        RET
+;
+OUTCHR: DS      2
+        DS      40
+BOTBUF: DS      1
+STACK   EQU     BOTBUF
+        END     BEG
+
+A>

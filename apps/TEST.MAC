@@ -1,0 +1,47 @@
+TYPW TEST.MAC^H^H^H^H^H^H^H^H^H^H^H^H^H^H^H^H^H^H^H^H^HTYPE TEST.MAC
+TITLE TEST  MACRO-80 DEMO PROGRAM
+;
+CPM     EQU     0
+CPMENT  EQU     5
+;
+START:  LXI     D,MESS1
+        MVI     C,9
+        CALL    CPMENT
+        LXI     D,MESS2
+        MVI     C,9
+        CALL    CPMENT
+        MVI     A,1
+LOOP:   PUSH    PSW
+        ORI     30H
+        PUSH    PSW
+        LXI     D,MESS3
+        MVI     C,9
+        CALL    CPMENT
+        POP     PSW
+        CPI     3AH
+        JNZ     NOTEN
+        MVI     A,31H
+        CALL    CHROUT
+        MVI     A,30H
+        CALL    CHROUT
+        JP      CPM
+NOTEN:  CALL    CHROUT
+        POP     PSW
+        INR     A
+        JP      LOOP
+;
+; PRINT CHARACTER IN A REGISTER
+;
+CHROUT: MOV     E,A
+        MVI     C,2
+        CALL    CPMENT
+        RET
+;
+; MESSAGES
+;
+MESS1:  DB      "THIS IS A MACRO-80 TEST",015,012,012,"$"
+MESS2:  DB      "RUNNING UNDER OSI CP/M",015,012,012,"$"
+MESS3:  DB      015,012,"TEST NUMBER $"
+        END     START
+
+A>
