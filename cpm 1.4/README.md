@@ -13,6 +13,11 @@ CPM.MAN (originally named CP/M.MAN)
 	command: load data into RAM from another OS (presumably OS65D), cold 
 	boot into CP/M and use SAVE to move the RAM data to disk.
 	
+CPM.DMP
+
+	Dump of CPM.COM which should set up a disk for use with OSI CP/M 1.4 .
+	(as yet untested/verified)
+	
 DSKDRV.MAC
 
 	FORTRAN-80 RUNTIME DISK DRIVER -- CP/M VERSIONS
@@ -28,7 +33,7 @@ LPTDRV.MAC
 
 TEST.MAC
 
-	(currently empty, sorry)
+	Source file for a simple Macro Assembler program in CP/M.
 	
 WFBIOS.DMP
 
@@ -41,6 +46,9 @@ ZBIOS.ASM
 	OSI hardware (tty, centronics).  Most of the calls are to the 6502 with
 	associated code to do the software processor swap.
 
-CPM_V14_6502_bootloader (disassembly by Mark Spankus)
+CPM_V14_6502_bootloader (disassembly/explanation by Mark Spankus)
 
-OSI CPM uses track 0 to boot/load 6502 code, & tiny Z80 code which jumps right back to 6502 to load CPM, track 1 contains CPM core.  Track 2 contains the CPM directory, so is the start of a CPM disk (logical block 0) from what I can tell. (Floppy Track 0 = CPM Track 1) One OSI track has 26 CPM disk blocks.
+	OSI CPM uses track 0 to boot/load 6502 code, & tiny Z80 code which jumps 
+	right back to 6502 to load CPM, track 1 contains CPM core.  Track 2 contains 
+	the CPM directory, so is the start of a CPM disk (logical block 0) from 
+	what I can tell. (Floppy Track 0 = CPM Track 1) One OSI track has 26 CPM disk blocks.
