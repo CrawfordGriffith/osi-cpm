@@ -1,0 +1,366 @@
+DUU.DOC
+by Ward Christensen (revised 09/27/81)
+With additional notes by Ron Fowler
+
+HOW TO USE DU ver 7.5 DISK UTILITY
+	(Extended and called DUU on CP/MUG v.55)
+
+DUU, Disk Utility-Universal, is an enhanced version of
+previous DU programs, on CP/MUG volumes 40 and 46.
+
+The primary change is the additions by Ron Fowler, to make DU
+work with virtually any 1.4 or 2.2 system, single or double
+density.  
+
+A further change by Ward C. updates the "F" command.  Under
+1.4, the "F" command would find a file, then position to it. 
+This was possible because open/search returned a number in
+(A) which was the "directory entry number".  However, since
+CP/M 2.2 doesn't return the actual "directory entry number" on
+an open or search, as 1.4 did (because 2.2 can have more
+directory entries).  Thus, DUU now does the directory search
+itself, positioning to the file.   See the "F" description
+below.
+
+
+	INDEX
+
+1.0	INSTALLATION:
+2.0	USE:
+ 2.1	COMMANDS, BY FUNCTION
+  2.2	ALPHABETIC COMMAND SUMMARY
+3.0	NOTES
+4.0	INTERPRETATING DIRECTORY DATA 
+  4.1	SINGLE DENSITY
+  4.2	DOUBLE DENSITY
+
+
+1.0	INSTALLATION:
+===
+	The 7.0 and later versions of DU are designed to 
+be installed with a minimum of trouble.  In fact, in al-
+most all cases, no changes to the source file should be
+necessary to get DU up and running. This is because DU
+uses the disk paramter block of CP/M to determine the
+characteristics of the disk environment.  (see the dis-
+claimer for certain non-standard versions of CP/M 1.4).
+	The only parameter that should need to be changed
+will be the clock speed flag at 103H.  Leave this byte
+zero if you have a 2 mhz clock.  Patch it non-zero for
+4 mhz.  This is only needed for the "Z" (sleep) command.
+An alternative is just to use larger numbers when running
+4mHZ or 5MHz.
+
+
+2.0	USE:
+===
+An initial command string may optionally be placed as an
+operand of the original DU command, i.e.:
+
+     A>DU G0;D;G2;=OK<D><A><1A>;D
+
+For example, if you want to only MAP the disk, then exit:
+
+	A>DU M;X
+
+Once DU is running, it expects single-letter commands much 
+like SID or DDT.  For ease of use, multiple commands may be 
+placed on one line, separated by ";".  In addition, a given 
+command or string of commands may be repeated, either indef-
+initely (until ^C is pressed), or a given number of times.
+
+To avoid an accidental ^C from dropping out of DU, only an 
+explicit "X" command will exit DU.
+
+
+2.1	COMMANDS, BY FUNCTION
+===
+
+Help:
+	?	request help
+
+Positioning:
+
+	Gnn	by allocation group
+	Snn	by sector
+	Tnn	by track
+	+nn	going ahead nn sectors
+	-nn	going back nn sectors
+
+I/O:
+	R	Reads sector
+	W	Writes sector
+	<	Puts current sector "away" into a buffer
+	>	Recalls previously saved sector
+
+Displaying:
+	G	Shows current group, track, sector
+	M	Maps the disk - where are the files
+	Mxx	Map starting at group xx
+	D	Dump the sector (hex + ascii)
+	A	Dump sector in ASCII
+	H	Dump sector in hex
+	Vnn	Views (like CP/M TYPE) nn sectors
+	#	Shows disk parameters
+
+Changing:
+	CHnn,val Change data in hex
+	CAnn,val Change data in ascii ( with <xx> escape to hex)
+	Unn	Change user to nn
+
+Searching:
+	Fname	Find a file in the directory
+	F	Find next occurrence (extent) of same name
+	=aaaa	Scan for aaaa (in ASCII) from current
+		sector on
+
+Misc:
+	Znn	Sleep (nn tenths of a second) such as to allow
+		viewing data before it scrolls off
+	Lx	Log in disk x
+	P	Turn on/off printer output toggle
+	Q	Before any command does it "quietly"
+	X	Exit to CP/M
+	/nn	Repeat previous command nn times
+		(indefinitely if nn omitted)
+
+
+2.2	ALPHABETIC COMMAND SUMMARY
+===
+
+	#	Prints the disk parameters
+
+	+	advance 1 sector (if below track 2,
+		this advances to next numerical, if
+		2 or >, advances based on CP/M's normal
+		sector scrambling algorithm, i.e. so +
+		will get the next logical sector of the file
+
+	-	backs up 1 logical sector
+
+		Note + and - may take an amount:
+		for example, +15 steps in 15 sectors.
+
+	/	Repeats entire command.  Defaults
+	/nn	to "forever".  nn may be 2 to 65535
+
+	<	Saves current sector in a save buffer
+
+	=string	Ascii search, starting at current
+		sector. <xx> hex may be imbedded,
+		or used alone:  To find "IN 0FEH":
+		=<db><fe>
+		Ignores bit 7 unless <xx> is used.
+
+		Since ";" is a command delimiter, you
+		have to use <3b> to search for a ";".
+		
+		Also, since "<" is a hex-escape char,
+		use << to meane a single "<".
+
+	>	Gets saved buffer.  < and > may be used
+		to move a sector to another place.
+
+
+	?	Gives command summary
+
+	A	Dump sector, ASCII only
+
+	CHaddr,val,val,val... change hex in sector
+	CAaddr,char string... change ASCII in sector
+		NOTE that <xx> may be hex imbedded
+		in the Ascii:  ca0,OK<d><a><1a>
+
+		----> Use W to write changes to disk.
+		Note that the C command echoes
+		the overlaid data for verification.
+
+	CHaddr-addr,byte
+ or	CAaddr-addr,byte	repeats a change
+
+	D	Dump sector, hex + ASCII
+
+	Fname	print directory for file "name",
+		then positions to it's directory 
+		sector. 
+
+	F	Find next occurrence of name in dir.
+
+	Gnn	Position to group nn and read.
+
+	G	Shows current position
+
+	H	Dump sector, hex only
+
+	L	Re-logs in the current disk. You may pull
+		out a disk, put in a new, and "L" just
+		to log it in. (See "LOGGING IN DISK" in NOTES 
+		below)
+
+	Lx	Logs in disk 'x', such as: LB
+
+	M	Dumps a map of the group allocations
+		for files.
+	Mn	Shows which file is allocated to
+		group "n".
+
+	N	Resets CP/M via the BDOS.  This may
+		make it possible under some implementations
+		of CP/M to change the disk format (e.g., density,
+		sides, etc)
+
+	P	Toggle printer switch on/off
+
+	Q	Quiet: Preceeding any command, suppresses console 
+		output
+
+	R	Reads the sector currently positioned to
+		into memory.  Note R (Read) is implicit in
+		the G, +, and - commands, but N-O-T in the
+		S and T commands (I did it because I was
+		tired of disk reading after T command before
+		I had a chance to issue the S command)
+
+
+	Snn	Position to sector nn, and read
+
+	Tnn	Seek to track nn (no read)
+
+	Ux	Logs user 'x' for next F command.  Gives
+		'?' error if not CP/M version 2.x.
+		(Note "F" no longer needs this - finds
+		 ALL files - erased, any user, etc)
+
+	V	Views the current sector.
+		(assumes ASCII data)
+	Vnn	Views nn sectors
+
+	W	Write back the current sector (N-O-T-E may
+		not be used after an F command, as CP/M was
+		used to find the file in the directory
+
+	X	Exit back to CP/M (Must press return).  Ctl-c
+		was too easy to hit over modem lines, so I
+		decided on 2-byte (X, CR) to exit.
+
+
+	Z	Sleep - causes the program to pause, such
+		as to look at a dump.  Z is 1 sec.  Znn
+		is nn tenths of a second on a 2 MHz 8080.
+
+
+
+3.0	====== NOTES ======
+===
+* MULTIPLE COMMANDS: May be separated by ";"
+
+Example: the following commands will erase the
+	b disk directory to all E5's:
+
+	lb		log in b drive
+	g0		position to dir.
+	ch0-7f,e5	fill with e5
+	<		save the sector
+	>;w;+;/16	restore, write, next,
+			repeat 16
+
+----This could be shortened to:
+
+	lb;g0;ch0-7f,e5;<
+	>;w;+;/16
+
+* DUMP COMMANDS: All dump commands (D, A, H) may be optionally 
+followed by a starting and ending address:
+	D0,7F	is the same as just D
+	D3,5
+	A20,3F
+
+* LOGGING IN DISK: In the original DU, I logged in the disk the 
+way DU now does.  Then, I found that when you had a blown 
+directory, you DIDN'T want to log the new disk in.  Thus I 
+changed DU to just change which disk was selected.  Then along 
+came double density, with its attendant "select density" 
+functions, and Ron apparently put this back in.  So, it now 
+sometimes works for double density, but makes DU very 
+"intolerant" of disks with un-readable directories.  A 
+solution is to log in a disk which is OK, and is of the same 
+density as the blown disk, then put in the blown disk WITHOUT 
+logging it in.
+	However, you are now opening yourself up to possible 
+problems because of the buffering of physical sectors in the 
+BIOS.  The best technique, (but not guaranteed), would be to 
+seek to the unused inner tracks of the first disk, do the 
+read, THEN change disks.  That way if it writes anything, you 
+won't have destroyed anything.  ...assuming the disk is not 
+completely full.  Another technique, assuming the second disk 
+does not contain a CP/M system, would be to seek to track 1, 
+then do the read there, then change disks to the blown one.
+
+
+4.0	INTERPRETATING DIRECTORY DATA 
+===
+4.1	SINGLE DENSITY
+===
+The following explains the format of a CP/M directory entry
+as shown by DU, using either the "F" (find file) command,
+or just doing "D" (dump) of the directory sectors, which
+are located in groups 0 and 1 on a single density disk.
+		----------------
+Sample result of "FSID.COM" command:
+
+40  00534944 20202020  20434F4D 0000003A  *.SID     COM...:*
+50  33343536 3738393A  00000000 00000000  *3456789:........*
+
+First line -
+
+40  00534944 20202020  20434F4D 0000003A  *.SID     COM...:*
+||  |||                      |  ||    ||    |         |
+||  ||^----hex file name-----^  ||    ||    ^file name^
+||  ||                          ||    ||     in ASCII
+||  ||                   extent-^^    ||
+||  ||                                ||
+||  ||           file size in sectors-^^
+||  ||
+||  ^^-00 = file active  Other values (e.g 03) = User #
+||     E5 = file erased
+^^-displacement of line in directory sector
+
+Second line -
+
+50  33343536 3738393A  00000000 00000000  *3456789:........*
+    |				       |   |
+    |				       |   ^- allocation groups
+    ^-----allocation group numbers-----^	just happened
+						to be printable
+
+
+4.2	DOUBLE DENSITY
+===
+
+The following is a sample of FSID.COM running on double
+density system:
+
+:FSID.COM
+00  00534944 20202020  20434F4D 0000003A  *.SID     COM...:*
+10  38003900 3A003B00  00000000 00000000  *8.9.:.;.........*
+G=0000:00, T=2, S=1, PS=0
+
+The primary difference is that the groups now occupy
+2 bytes, i.e. "38 00" "39 00" ...  This follows the INTEL
+and CP/M convention of putting 16 bit values high-byte-first.
+Thus it means group 0038, 0039, etc.
+
+Note that in double density, each group stood for 2K, not 1K,
+so there were half as many groups for the same file.
+
+Be VERY careful when patching a directory under double density.
+I once made the mistake of putting, for example:
+
+	ch10,38,39,3a,3b...
+
+When I went to read this file, it tried to access group 3938,
+with resultant angry exclamations from the disk stepper as it
+attempted to go south to Peoria for the data.
+
+					09/30/81 Ward C.
+
