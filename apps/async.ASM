@@ -1,4 +1,3 @@
-
 ;
 ;
 ; CHANGE HISTORY
@@ -638,5 +637,3 @@ BUFCNT: DB      0               ;COUNT OF CHARACTERS USED IN BUFFER
 ;
 ;
         END
-
-A>
