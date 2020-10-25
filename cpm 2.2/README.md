@@ -17,6 +17,14 @@ OSIGEN.DMP
 	More to come... needs disassembly.
 	
 OSILNKS.ASM
-	This is a 'glue' file for the OSI Z80 bios for CP/M.  It shows all
-	of the entry points for warm boot, cold boot, I/O etc.  It has some
-	initialization code for centronics printers.
+	This is a 'part one' of the OSI Z80 bios for CP/M.  It has
+	of the routines for serial I/O and initialization code for 
+	centronics printers.  There is a jump table that hands off
+	disk routines to 'part two' of the BIOS, which I've referred
+	to (incorrectly) as BDOS.
+	
+BDOSDISASM.Z80
+        This is the disassembly of the 'part two' BIOS, which handles
+	disk routines.  It resides at D000, and has a fully populated
+	jump table, with references to the part one BIOS.  Note that this
+	is Z80 code!
