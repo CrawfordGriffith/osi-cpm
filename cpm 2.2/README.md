@@ -7,6 +7,11 @@ and modified as necessary.
 
 Files description:
 
+CPM2 on Ohio Scientific Challenger III.pdf
+        This is a pdf of a scan of the documentation provided with
+	OSI CP/M 2.2 version.  It contains a few pages of information
+	on the files provided with the distribution.
+
 DUMP.ASM
 	This is the source for the DUMP utility, that takes a file name
 	and outputs the file contents as a Hexadecimal dump.
