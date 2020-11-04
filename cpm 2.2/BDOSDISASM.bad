@@ -1,0 +1,1390 @@
+LD000:   jp 0xd19c 	; 0 BOOT
+LD003:   jp 0xd212	; 1 WBOOT
+LD006:   jp 0xbe06	; 2 CONST - IN REGULAR BIOS (BE00)
+LD009:   jp 0xbe09	; 3 CONIN - - IN REGULAR BIOS (BE00)
+LD00c:   jp 0xbe0c	; 4 CONOUT- IN REGULAR BIOS (BE00)
+LD00f:   jp 0xbe0f	; 5 LIST- IN REGULAR BIOS (BE00)
+LD012:   jp 0xbe12	; 6 PUNCH- IN REGULAR BIOS (BE00)
+LD015:   jp 0xbe15	; 7 READER- IN REGULAR BIOS (BE00)
+LD018:   jp 0xd337	; 8 HOME
+LD01b:   jp 0xd319	; 9 SELDSK
+LD01e:   jp 0xd33a	; 10 SETTRK
+LD021:   jp 0xd358	; 11 SETSEC
+LD024:   jp 0xd376	; 12 SETDMA
+LD027:   jp 0xd385	; 13 READ
+LD02a:   jp 0xd3a2	; 14 WRITE
+LD02d:   jp 0xbe2d	; 15 LISTST - IN REGULAR BIOS (BE00)
+LD030:   jp 0xd37b	; 16 SECTRAN
+
+;LD033:   jp 0xd470	; 17 ???
+;LD036:   jp 0xd404	; 18 FLUSH
+;LD039:   jp 0xd548	; 19 ???
+
+LD033: 
+	db C3 70 D4 C3 04 D4 C3 48 D5 CB D0 10 00 0C 00 38 
+	db 01 53 DB BC D0 F1 DB D3 DB F4 D0 00 00 00 00 00 
+	db 00 53 DB E5 D0 1F DC 01 DC 1D D1 00 00 
+    db 00 00 00 
+	00 53 DB 0E D1 4D DC 2F DC 46 D1 00 00 ;....S...M.    db .F...
+    db 00 00 00 00 53 DB 37 D1 7B DC 5D DC 00 00 00 00 ;....S.7.{.].....
+    db 00 00 00 00 53 DB 60 D1 61 DD 8B DC 00 00 00 00 ;....S.`.a.......
+    db 00 00 00 00 53 DB 6F D1 38 DE 61 DD 00 00 00 00 ;....S.o.8.a.....
+    db 00 00 00 00 53 DB 7E D1 0F DF 38 DE 00 00 00 00 ;....S.~...8.....
+    db 00 00 00 00 53 DB 8D D1 E6 DF 0F DF 1A 00 03 07 ;....S...........
+    db 00 EF 00 3F 00 C0 00 10 00 03 00 01 07 0D 13 19 ;...?............
+    db 05 0B 11 17 03 09 0F 15 02 08 0E 14 1A 06 0C 12 ;................
+    db 18 04 0A 10 16 1A 00 03 07 00 EF 00 3F 00 C0 00 ;............?...
+    db 10 00 03 00 01 07 0D 13 19 05 0B 11 17 03 09 0F ;................
+    db 15 02 08 0E 14 1A 06 0C 12 18 04 0A 10 16 1A 00 ;................
+    db 03 07 00 EF 00 3F 00 C0 00 10 00 03 00 01 07 0D ;.....?..........
+    db 13 19 05 0B 11 17 03 09 0F 15 02 08 0E 14 1A 06 ;................
+    db 0C 12 18 04 0A 10 16 1A 00 03 07 00 EF 00 3F 00 ;..............?.
+    db C0 00 10 00 03 00 01 07 0D 13 19 05 0B 11 17 03 ;................
+    db 09 0F 15 02 08 0E 14 1A 06 0C 12 18 04 0A 10 16 ;................
+    db 88 00 05 1F 01 AF 06 FF 03 FF 00 00 00 01 00 88 ;................
+    db 00 05 1F 01 B4 06 FF 03 FF 00 00 00 94 01 88 00 ;................
+    db 05 1F 01 B4 06 FF 03 FF 00 00 00 28 03 88 00 05 ;...........(....
+    db 1F 01 B4 06 FF 03 FF 00 00 00 BC 04             ;............
+
+BOOT:
+LD19c:     ld sp,0x0100
+LD19f:     ld a,0x81
+LD1a1:     ld (0x0003),a
+LD1a4:     xor a
+LD1a5:     ld (0x0004),a
+LD1a8:     ld (0xdb50),a
+LD1ab:     call 0xd241
+LD1ae:     call 0xbe00
+LD1b1:     ld hl,0xd1b9
+LD1b4:     call 0xd303
+LD1b7:     jr 0xd218
+LD1B9: db 0D 0A 34 39 4B 20 43 							 ;..49K C
+    db 50 2F 4D 20 56 65 72 73 20 32 2E 32 32 0D 0A 66 ;P/M Vers 2.22..f
+    db 6F 72 20 4F 68 69 6F 20 53 63 69 65 6E 74 69 66 ;or Ohio Scientif
+    db 69 63 20 43 33 20 20 0D 0A 28 43 29 20 43 6F 70 ;ic C3  ..(C) Cop
+    db 79 72 69 67 68 74 20 31 39 38 30 20 4C 69 66 65 ;yright 1980 Life
+    db 62 6F 61 74 20 41 73 73 6F 63 69 61 74 65 73 0D ;boat Associates.
+    db 0A 00											;
+
+WBOOT:
+LD212:     ld sp,0x0100
+LD215:     call 0xd23c
+LD218:     ld a,0xc3
+LD21a:     ld (0x0000),a
+LD21d:     ld hl,0xbe03
+LD220:     ld (0x0001),hl
+LD223:     ld (0x0005),a
+LD226:     ld hl,0xb006
+LD229:     ld (0x0006),hl
+LD22c:     ld bc,0x0080
+LD22f:     call 0xd376 ; SETDMA
+LD232:     call 0xd2d2
+LD235:     ld a,(0x0004)
+LD238:     ld c,a
+LD239:     jp 0xa800
+LD23c:     ld a,0x57
+LD23e:     ld (0xd255),a
+LD241:     ld b,0x05
+LD243:     push bc
+LD244:     call 0xd263
+LD247:     pop bc
+LD248:     ret z
+LD249:     djnz 0xd241
+LD24b:     ld hl,0xd253
+LD24e:     call 0xd303
+LD251:     jr 0xd251
+
+LD253 db 0D 0A 20 42 6F 6F 74 20 45 72 72 6F 72 ; ..... Boot Error
+	  db 0D 0A 00 
+
+
+LD263:     ld a,(0xeffd)
+LD266:     or a
+LD267:     jp z,0xd273
+LD26a:     call 0xd9de
+LD26d:     jp nz,0xd273
+LD270:     jp 0xd2a2
+LD273:     ld c,0x00
+LD275:     call 0xd319 ; SELDSK
+LD278:     ld bc,0x0001
+LD27b:     call 0xd33a ; SETTRK
+LD27e:     ld hl,0xa800
+LD281:     ld (0xdb4a),hl
+LD284:     ld bc,0x1902
+LD287:     call 0xd2ba
+LD28a:     ret nz
+LD28b:     ld c,0x02
+LD28d:     call 0xd33a ; SETTRK
+LD290:     ld bc,0x1701
+LD293:     ld a,(0xd255)
+LD296:     cp 0x57
+LD298:     jp nz,0xd29e
+LD29b:     ld bc,0x1301
+LD29e:     call 0xd2ba
+LD2a1:     ret
+
+LD2a2:     ld c,0x04
+LD2a4:     call 0xd319 ; SELDSK
+LD2a7:     ld bc,0x0000
+LD2aa:     call 0xd33a ; SETTRK
+LD2ad:     ld hl,0xa800
+LD2b0:     ld (0xdb4a),hl
+LD2b3:     ld bc,0x3031
+LD2b6:     call 0xd2ba
+LD2b9:     ret
+
+LD2ba:     push bc
+LD2bb:     call 0xd358 ; SETSEC
+LD2be:     call 0xd385 ; READ
+LD2c1:     pop bc
+LD2c2:     ret nz
+LD2c3:     ld hl,(0xdb4a)
+LD2c6:     ld de,0x0080
+LD2c9:     add hl,de
+LD2ca:     ld (0xdb4a),hl
+LD2cd:     inc c
+LD2ce:     djnz 0xd2ba
+LD2d0:     xor a
+LD2d1:     ret
+
+LD2d2:     ld hl,0xc010
+LD2d5:     ld bc,0x0000
+LD2d8:     bit 1,(hl)
+LD2da:     jr z,0xd2d8
+LD2dc:     ld (0xc011),a
+LD2df:     ld (0xc011),a
+LD2e2:     inc b
+LD2e3:     bit 1,(hl)
+LD2e5:     jr z,0xd2e2
+LD2e7:     ld a,b
+LD2e8:     cp 0x06
+LD2ea:     jr c,0xd2f6
+LD2ec:     ld hl,0x0000
+LD2ef:     ld (0xd465),hl
+LD2f2:     ld (0xd467),hl
+LD2f5:     ret
+
+LD2f6:     ld hl,0x38cb
+LD2f9:     ld (0xd465),hl
+LD2fc:     ld hl,0x19cb
+LD2ff:     ld (0xd467),hl
+LD302:     ret
+
+LD303:     xor a
+LD304:     ld c,(hl)
+LD305:     or c
+LD306:     ret z
+LD307:     push hl
+LD308:     call 0xd30f
+LD30b:     pop hl
+LD30c:     inc hl
+LD30d:     jr 0xd303
+LD30f:     ld hl,0xfc00
+LD312:     bit 1,(hl)
+LD314:     jr z,0xd312
+LD316:     inc hl
+LD317:     ld (hl),c
+LD318:     ret
+
+SELDSK:
+LD319:     ld hl,0x0000
+LD31c:     ld a,c
+LD31d:     cp 0x04
+LD31f:     ret nc
+LD320:     ld l,a
+LD321:     add hl,hl
+LD322:     add hl,hl
+LD323:     add hl,hl
+LD324:     add hl,hl
+LD325:     ld de,0xd03c
+LD328:     add hl,de
+LD329:     cp 0x04
+LD32b:     jr c,0xd333
+LD32d:     srl a
+LD32f:     srl a
+LD331:     add a,0x03
+LD333:     ld (0xdb41),a
+LD336:     ret
+
+HOME:
+LD337:     ld bc,0x0000
+SETTRK:
+LD33a:     ld (0xdb42),bc
+LD33e:     ld a,(0xdb41)
+LD341:     cp 0x04
+LD343:     jr c,0xd356
+LD345:     ld a,0x07
+LD347:     and c
+LD348:     ld (0xdb43),a
+LD34b:     ld h,b
+LD34c:     ld l,c
+LD34d:     add hl,hl
+LD34e:     add hl,hl
+LD34f:     add hl,hl
+LD350:     add hl,hl
+LD351:     add hl,hl
+LD352:     ld a,h
+LD353:     ld (0xdb42),a
+LD356:     xor a
+LD357:     ret
+
+SETSEC:
+LD358:     ld hl,0xdb49
+LD35b:     ld (hl),c
+LD35c:     ld a,(0xdb41)
+LD35f:     cp 0x04
+LD361:     jr c,0xd374
+LD363:     ld a,c
+LD364:     srl a
+LD366:     srl a
+LD368:     srl a
+LD36a:     ld (0xdb44),a
+LD36d:     ld a,0x07
+LD36f:     and c
+LD370:     inc a
+LD371:     ld (0xdb49),a
+LD374:     xor a
+LD375:     ret
+
+SETDMA:
+LD376:     ld (0xdb4a),bc
+LD37a:     ret
+
+SECTRAN:
+LD37b:     ld h,b
+LD37c:     ld l,c
+LD37d:     ld a,d
+LD37e:     or e
+LD37f:     ret z
+LD380:     add hl,de
+LD381:     ld l,(hl)
+LD382:     ld h,0x00
+LD384:     ret
+
+READ:
+LD385:     ld a,(0xdb41)
+LD388:     cp 0x04
+LD38a:     jr nc,0xd39b
+LD38c:     ld a,(0xdb49)
+LD38f:     dec a
+LD390:     jr nz,0xd39b
+LD392:     call 0xd404 ; FLUSH
+LD395:     ret nz
+LD396:     ld hl,0xdb50
+LD399:     ld (hl),0x00
+LD39b:     call 0xd3bc
+LD39e:     ret nz
+LD39f:     ldir
+LD3a1:     ret
+
+WRITE:
+LD3a2:     ld hl,0xdb52
+LD3a5:     ld (hl),c
+LD3a6:     call 0xd3bc
+LD3a9:     ret nz
+LD3aa:     ex de,hl
+LD3ab:     ldir
+LD3ad:     ld hl,0xdb51
+LD3b0:     ld (hl),0xff
+LD3b2:     ld a,(0xdb52)
+LD3b5:     cp 0x01
+LD3b7:     jp z,0xd436
+LD3ba:     xor a
+LD3bb:     ret
+
+LD3bc:     ld a,(0xdb50)
+LD3bf:     or a
+LD3c0:     jr z,0xd3e8
+LD3c2:     ld hl,(0xdb42)
+LD3c5:     ld de,(0xdb46)
+LD3c9:     or a
+LD3ca:     sbc hl,de
+LD3cc:     jr nz,0xd3e4
+LD3ce:     ld a,(0xdb41)
+LD3d1:     ld hl,0xdb45
+LD3d4:     cp (hl)
+LD3d5:     jr nz,0xd3e4
+LD3d7:     cp 0x04
+LD3d9:     jr c,0xd3ec
+LD3db:     ld a,(0xdb44)
+LD3de:     ld hl,0xdb48
+LD3e1:     cp (hl)
+LD3e2:     jr z,0xd3ec
+LD3e4:     call 0xd404 ; FLUSH
+LD3e7:     ret nz
+LD3e8:     call 0xd410
+LD3eb:     ret nz
+LD3ec:     ld hl,0xdb49
+LD3ef:     ld h,(hl)
+LD3f0:     dec h
+LD3f1:     ld l,0x00
+LD3f3:     srl h
+LD3f5:     rr l
+LD3f7:     ld de,0xe018
+LD3fa:     add hl,de
+LD3fb:     ld de,(0xdb4a)
+LD3ff:     ld bc,0x0080
+LD402:     xor a
+LD403:     ret
+		   
+FLUSH:     
+LD404:     ld a,(0xdb50)
+LD407:     or a
+LD408:     ret z
+LD409:     ld a,(0xdb51)
+LD40c:     or a
+LD40d:     ret z
+LD40e:     jr 0xd436
+LD410:     xor a
+LD411:     call 0xd440
+LD414:     ld a,(0xdb41)
+LD417:     ld (0xdb45),a
+LD41a:     ld hl,(0xdb42)
+LD41d:     ld (0xdb46),hl
+LD420:     ld a,(0xdb44)
+LD423:     ld (0xdb48),a
+LD426:     ld a,0xff
+LD428:     ld (0xdb50),a
+LD42b:     ld a,0x00
+LD42d:     ld (0xdb51),a
+LD430:     ret z
+LD431:     ld (0xdb50),a
+LD434:     inc a
+LD435:     ret
+		   
+LD436:     xor a
+LD437:     ld (0xdb51),a
+LD43a:     ld a,0xff
+LD43c:     call 0xd440
+LD43f:     ret
+		   
+LD440:     or a
+LD441:     jr z,0xd454
+LD443:     ld hl,0xdb45
+LD446:     ld a,(hl)
+LD447:     cp 0x04
+LD449:     jp c,0xd5d1
+LD44c:     push ix
+LD44e:     call 0xd8cd
+LD451:     pop ix
+LD453:     ret
+		   
+LD454:     ld hl,0xdb41
+LD457:     ld a,(hl)
+LD458:     cp 0x04
+LD45a:     jp c,0xd5b0
+LD45d:     push ix
+LD45f:     call 0xd8b1
+LD462:     pop ix
+LD464:     ret
+		   
+LD465:     DB CB 38
+LD467:     DB CB 19
+		   
+LD469:     dec bc
+LD46a:     ld a,b
+LD46b:     or c
+LD46c:     jp nz,0xd469
+LD46f:     ret
+		   
+LD470:     push hl
+LD471:     push de
+LD472:     call 0xd319 ; SELDSK
+LD475:     ld a,h
+LD476:     or l
+LD477:     jr z,0xd49f
+LD479:     ld (0xdb4e),hl
+LD47c:     call 0xd404
+LD47f:     ld hl,0xe018
+LD482:     ld de,0xe019
+LD485:     ld bc,0x0d00
+LD488:     ld (hl),0xe5
+LD48a:     ldir
+LD48c:     ld hl,0x0000
+LD48f:     ld (0xdb4c),hl
+LD492:     ld a,(0xdb41)
+LD495:     cp 0x04
+LD497:     pop de
+LD498:     pop hl
+LD499:     jp c,0xd4df
+LD49c:     jp 0xd4a5
+LD49f:     pop hl
+LD4a0:     pop hl
+LD4a1:     ld a,0x01
+LD4a3:     or a
+LD4a4:     ret
+		   
+LD4a5:     push de
+LD4a6:     pop bc
+LD4a7:     push bc
+LD4a8:     push hl
+LD4a9:     call 0xd33a ; SETTRK
+LD4ac:     ld a,(0xdb41)
+LD4af:     ld (0xdb45),a
+LD4b2:     ld hl,(0xdb42)
+LD4b5:     ld (0xdb46),hl
+LD4b8:     ld b,0x11
+LD4ba:     push bc
+LD4bb:     ld a,b
+LD4bc:     dec a
+LD4bd:     ld (0xdb48),a
+LD4c0:     call 0xd436
+LD4c3:     pop bc
+LD4c4:     jr z,0xd4cd
+LD4c6:     ld hl,(0xdb4c)
+LD4c9:     inc hl
+LD4ca:     ld (0xdb4c),hl
+LD4cd:     djnz 0xd4ba
+LD4cf:     pop hl
+LD4d0:     pop bc
+LD4d1:     inc bc
+LD4d2:     dec hl
+LD4d3:     ld a,h
+LD4d4:     or l
+LD4d5:     jr nz,0xd4a7
+LD4d7:     xor a
+LD4d8:     ld (0xdb50),a
+LD4db:     ld hl,(0xdb4c)
+LD4de:     ret
+		   
+LD4df:     push hl
+LD4e0:     call 0xd5e3
+LD4e3:     call 0xd618
+LD4e6:     pop hl
+LD4e7:     ret nz
+LD4e8:     push hl
+LD4e9:     call 0xd671
+LD4ec:     call 0xd71e
+LD4ef:     call 0xd833
+LD4f2:     pop bc
+LD4f3:     ld b,c
+LD4f4:     dec b
+LD4f5:     jr z,0xd513
+LD4f7:     ld c,0x01
+LD4f9:     push bc
+LD4fa:     call 0xd33a ; SETTRK
+LD4fd:     call 0xd62f
+LD500:     call 0xd87f
+LD503:     call 0xd527
+LD506:     jr z,0xd50f
+LD508:     ld hl,(0xdb4c)
+LD50b:     inc hl
+LD50c:     ld (0xdb4c),hl
+LD50f:     pop bc
+LD510:     inc c
+LD511:     djnz 0xd4f9
+LD513:     call 0xd83f
+LD516:     ld a,(0x0004)
+LD519:     and 0x0f
+LD51b:     ld c,a
+LD51c:     call 0xd319 ; SELDSK
+LD51f:     xor a
+LD520:     ld (0xdb50),a
+LD523:     ld hl,(0xdb4c)
+LD526:     ret
+		   
+LD527:     call 0xd81f
+LD52a:     ld (0xdb28),a
+LD52d:     call 0xd80d
+LD530:     call 0xd861
+LD533:     call 0xd845
+LD536:     ld bc,0x00a3
+LD539:     call 0xd465
+LD53c:     ld hl,0xdb26
+LD53f:     ld bc,0x0004
+LD542:     call 0xd7f9
+LD545:     jp 0xd738
+LD548:     call 0xd404
+LD54b:     ld hl,(0xdb4a)
+LD54e:     ld de,0xe018
+LD551:     ld bc,0x0e00
+LD554:     ldir
+LD556:     ld a,0x04
+LD558:     ld (0xdb45),a
+LD55b:     ld hl,0x0000
+LD55e:     ld (0xdb46),hl
+LD561:     xor a
+LD562:     ld (0xdb48),a
+LD565:     dec a
+LD566:     ld (0xdb50),a
+LD569:     ld hl,0x0010
+LD56c:     ld (0xd88f),hl
+LD56f:     ld hl,0x0715
+LD572:     ld (0xda46),hl
+LD575:     ld hl,0xee1a
+LD578:     ld (0xdaac),hl
+LD57b:     ld a,0x0e
+LD57d:     ld (0xdae3),a
+LD580:     ld hl,(0xdaf7)
+LD583:     push hl
+LD584:     ld hl,0xc9af
+LD587:     ld (0xdaf7),hl
+LD58a:     call 0xd436
+LD58d:     push af
+LD58e:     ld hl,0x0004
+LD591:     ld (0xd88f),hl
+LD594:     ld hl,0x0211
+LD597:     ld (0xda46),hl
+LD59a:     ld hl,0xe41a
+LD59d:     ld (0xdaac),hl
+LD5a0:     ld a,0x04
+LD5a2:     ld (0xdae3),a
+LD5a5:     pop af
+LD5a6:     pop hl
+LD5a7:     ld (0xdaf7),hl
+LD5aa:     ld hl,0xdb50
+LD5ad:     ld (hl),0x00
+LD5af:     ret
+
+LD5b0:     ld b,0x02
+LD5b2:     push bc
+LD5b3:     call 0xd5bb
+LD5b6:     pop bc
+LD5b7:     ret z
+LD5b8:     djnz 0xd5b2
+LD5ba:     ret
+
+LD5bb:     ld a,(0xdb41)
+LD5be:     ld hl,0xdb2a
+LD5c1:     cp (hl)
+LD5c2:     call nz,0xd5e3
+LD5c5:     ret nz
+LD5c6:     call 0xd618
+LD5c9:     ret nz
+LD5ca:     call 0xd62f
+LD5cd:     ret nz
+LD5ce:     jp 0xd692
+LD5d1:     ld b,0x02
+LD5d3:     push bc
+LD5d4:     call 0xd5dc
+LD5d7:     pop bc
+LD5d8:     ret z
+LD5d9:     djnz 0xd5d3
+LD5db:     ret
+
+LD5dc:     call 0xd618
+LD5df:     ret nz
+LD5e0:     jp 0xd71e
+LD5e3:     ld a,(0xdb2a)
+LD5e6:     res 1,a
+LD5e8:     ld h,0x00
+LD5ea:     ld l,a
+LD5eb:     ld de,0xdb2c
+LD5ee:     add hl,de
+LD5ef:     ld a,(0xdb2b)
+LD5f2:     ld (hl),a
+LD5f3:     ld a,(0xdb41)
+LD5f6:     push af
+LD5f7:     add a,a
+LD5f8:     ld l,a
+LD5f9:     ld h,0x00
+LD5fb:     ld bc,0xdb2e
+LD5fe:     add hl,bc
+LD5ff:     ld a,(hl)
+LD600:     ld (0xc000),a
+LD603:     inc hl
+LD604:     ld a,(hl)
+LD605:     ld (0xc002),a
+LD608:     pop af
+LD609:     ld (0xdb2a),a
+LD60c:     res 1,a
+LD60e:     ld h,0x00
+LD610:     ld l,a
+LD611:     add hl,de
+LD612:     ld a,(hl)
+LD613:     ld (0xdb2b),a
+LD616:     xor a
+LD617:     ret
+
+LD618:     xor a
+LD619:     ld hl,0xdb2a
+LD61c:     bit 0,(hl)
+LD61e:     ld hl,0xc000
+LD621:     call 0xd627
+LD624:     ret z
+LD625:     inc a
+LD626:     ret
+
+LD627:     jr nz,0xd62c
+LD629:     bit 0,(hl)
+LD62b:     ret
+
+LD62c:     bit 4,(hl)
+LD62e:     ret
+
+LD62f:     ld a,(0xdb2b)
+LD632:     cp 0xff
+LD634:     jr nz,0xd63a
+LD636:     call 0xd671
+LD639:     ret nz
+LD63a:     ld a,(0xdb42)
+LD63d:     ld hl,0xdb2b
+LD640:     sub (hl)
+LD641:     ret z
+LD642:     ld e,a
+LD643:     jr c,0xd64c
+LD645:     ld hl,0xc002
+LD648:     res 2,(hl)
+LD64a:     jr 0xd654
+LD64c:     ld hl,0xc002
+LD64f:     set 2,(hl)
+LD651:     xor a
+LD652:     sub e
+LD653:     ld e,a
+LD654:     ld b,0x04
+LD656:     djnz 0xd656
+LD658:     res 3,(hl)
+LD65a:     ld b,0x04
+LD65c:     djnz 0xd65c
+LD65e:     set 3,(hl)
+LD660:     ld bc,0x2085
+LD663:     call 0xd465
+LD666:     dec e
+LD667:     jr nz,0xd658
+LD669:     ld a,(0xdb42)
+LD66c:     ld (0xdb2b),a
+LD66f:     xor a
+LD670:     ret
+
+LD671:     ld e,0x01
+LD673:     call 0xd645
+LD676:     ld d,0x51
+LD678:     ld hl,0xc000
+LD67b:     bit 1,(hl)
+LD67d:     jr z,0xd68e
+LD67f:     ld e,0xff
+LD681:     call 0xd64c
+LD684:     dec d
+LD685:     jr nz,0xd678
+LD687:     dec a
+LD688:     ld (0xdb2b),a
+LD68b:     inc a
+LD68c:     inc a
+LD68d:     ret
+
+LD68e:     ld (0xdb2b),a
+LD691:     ret
+
+LD692:     call 0xd833
+LD695:     call 0xd69c
+LD698:     call 0xd83f
+LD69b:     ret
+
+LD69c:     call 0xd6b5
+LD69f:     ret nz
+LD6a0:     ld de,0xe018
+LD6a3:     ld a,(hl)
+LD6a4:     bit 0,a
+LD6a6:     jp z,0xd6a3
+LD6a9:     and 0x70
+LD6ab:     ret nz
+LD6ac:     inc hl
+LD6ad:     ldi
+LD6af:     dec hl
+LD6b0:     dec hl
+LD6b1:     jp pe,0xd6a3
+LD6b4:     ret
+
+LD6b5:     ld a,(0xdb2b)
+LD6b8:     or a
+LD6b9:     jr nz,0xd6da
+LD6bb:     call 0xd861
+LD6be:     ld b,0x03
+LD6c0:     ld de,0xc000
+LD6c3:     ld c,0x00
+LD6c5:     bit 0,(hl)
+LD6c7:     jp nz,0xd6d2
+LD6ca:     ld a,(de)
+LD6cb:     and 0x80
+LD6cd:     jp nz,0xd6c5
+LD6d0:     inc a
+LD6d1:     ret
+
+LD6d2:     ld a,(0xc011)
+LD6d5:     djnz 0xd6c5
+LD6d7:     ld b,a
+LD6d8:     xor a
+LD6d9:     ret
+
+LD6da:     call 0xd794
+LD6dd:     ret nz
+LD6de:     ld hl,0xc010
+LD6e1:     ld de,0xc000
+LD6e4:     ld c,0x00
+LD6e6:     bit 0,(hl)
+LD6e8:     jp nz,0xd6f3
+LD6eb:     ld a,(de)
+LD6ec:     and 0x80
+LD6ee:     jp nz,0xd6e6
+LD6f1:     inc a
+LD6f2:     ret
+
+LD6f3:     ld a,(0xc011)
+LD6f6:     cp 0x76
+LD6f8:     jp nz,0xd6e6
+LD6fb:     bit 0,(hl)
+LD6fd:     jp nz,0xd708
+LD700:     ld a,(de)
+LD701:     and 0x80
+LD703:     jp nz,0xd6fb
+LD706:     inc a
+LD707:     ret
+
+LD708:     ld a,(0xc011)
+LD70b:     bit 0,(hl)
+LD70d:     jp nz,0xd718
+LD710:     ld a,(de)
+LD711:     and 0x80
+LD713:     jp nz,0xd70b
+LD716:     inc a
+LD717:     ret
+
+LD718:     ld a,(0xc011)
+LD71b:     ld b,a
+LD71c:     xor a
+LD71d:     ret
+
+LD71e:     call 0xd80d
+LD721:     call 0xd87f
+LD724:     call 0xd833
+LD727:     call 0xd72e
+LD72a:     call 0xd83f
+LD72d:     ret
+
+LD72e:     ld a,(0xdb2b)
+LD731:     or a
+LD732:     jr z,0xd76c
+LD734:     call 0xd794
+LD737:     ret nz
+LD738:     ld bc,0x0082
+LD73b:     call 0xd465
+LD73e:     call 0xd845
+LD741:     ld bc,0x0082
+LD744:     call 0xd465
+LD747:     ld hl,0xe015
+LD74a:     ld bc,0x0d05
+LD74d:     call 0xd7f9
+LD750:     call 0xd853
+LD753:     call 0xd6b5
+LD756:     ret nz
+LD757:     ld de,0xe018
+LD75a:     bit 0,(hl)
+LD75c:     jp z,0xd75a
+LD75f:     ld a,(de)
+LD760:     inc hl
+LD761:     cpi
+LD763:     ret nz
+LD764:     dec hl
+LD765:     dec hl
+LD766:     inc de
+LD767:     jp pe,0xd75a
+LD76a:     xor a
+LD76b:     ret
+
+LD76c:     ld hl,0x0022
+LD76f:     ld (0xe015),hl
+LD772:     ld a,0x0d
+LD774:     ld (0xe017),a
+LD777:     call 0xd861
+LD77a:     call 0xd845
+LD77d:     call 0xd861
+LD780:     ld bc,0x00a3
+LD783:     call 0xd465
+LD786:     ld hl,0xe015
+LD789:     ld bc,0x0d05
+LD78c:     call 0xd7f9
+LD78f:     call 0xd853
+LD792:     xor a
+LD793:     ret
+
+LD794:     call 0xd81f
+LD797:     ld (0xdb28),a
+LD79a:     call 0xd861
+LD79d:     ret nz
+LD79e:     ld de,0xc000
+LD7a1:     bit 0,(hl)
+LD7a3:     jp nz,0xd7ae
+LD7a6:     ld a,(de)
+LD7a7:     and 0x80
+LD7a9:     jp nz,0xd7a1
+LD7ac:     inc a
+LD7ad:     ret
+
+LD7ae:     ld a,(0xc011)
+LD7b1:     cp 0x43
+LD7b3:     jp nz,0xd7a1
+LD7b6:     bit 0,(hl)
+LD7b8:     jp nz,0xd7c3
+LD7bb:     ld a,(de)
+LD7bc:     and 0x80
+LD7be:     jp nz,0xd7b6
+LD7c1:     inc a
+LD7c2:     ret
+
+LD7c3:     ld a,(0xc011)
+LD7c6:     cp 0x57
+LD7c8:     jp nz,0xd7a1
+LD7cb:     bit 0,(hl)
+LD7cd:     jp nz,0xd7d8
+LD7d0:     ld a,(de)
+LD7d1:     and 0x80
+LD7d3:     jp nz,0xd7cb
+LD7d6:     inc a
+LD7d7:     ret
+
+LD7d8:     ld a,(0xc011)
+LD7db:     ld b,a
+LD7dc:     bit 0,(hl)
+LD7de:     jp nz,0xd7e9
+LD7e1:     ld a,(de)
+LD7e2:     and 0x80
+LD7e4:     jp nz,0xd7dc
+LD7e7:     inc a
+LD7e8:     ret
+
+LD7e9:     ld a,(0xc011)
+LD7ec:     ld a,(0xdb28)
+LD7ef:     sub b
+LD7f0:     ret z
+LD7f1:     ld a,0x01
+LD7f3:     ld hl,0xdb2b
+LD7f6:     ld (hl),0xff
+LD7f8:     ret
+
+LD7f9:     ld a,(0xc010)
+LD7fc:     bit 1,a
+LD7fe:     jp z,0xd7f9
+LD801:     ld a,(hl)
+LD802:     ld (0xc011),a
+LD805:     inc hl
+LD806:     dec bc
+LD807:     ld a,b
+LD808:     or c
+LD809:     jp nz,0xd7f9
+LD80c:     ret
+
+LD80d:     ld hl,0xe015
+LD810:     ld (hl),0x76
+LD812:     inc hl
+LD813:     ld (hl),0x01
+LD815:     inc hl
+LD816:     ld (hl),0x0d
+LD818:     ld hl,0x5347
+LD81b:     ld (0xed18),hl
+LD81e:     ret
+
+LD81f:     ld a,(0xdb2b)
+LD822:     ld b,0xff
+LD824:     inc b
+LD825:     sub 0x0a
+LD827:     jr nc,0xd824
+LD829:     add a,0x0a
+LD82b:     ld c,a
+LD82c:     ld a,b
+LD82d:     add a,a
+LD82e:     add a,a
+LD82f:     add a,a
+LD830:     add a,a
+LD831:     add a,c
+LD832:     ret
+
+LD833:     ld hl,0xc002
+LD836:     res 7,(hl)
+LD838:     ld bc,0x1a07
+LD83b:     call 0xd465
+LD83e:     ret
+
+LD83f:     ld hl,0xc002
+LD842:     set 7,(hl)
+LD844:     ret
+LD845:     ld hl,0xc002
+LD848:     res 0,(hl)
+LD84a:     ld bc,0x001e
+LD84d:     call 0xd465
+LD850:     res 1,(hl)
+LD852:     ret
+
+LD853:     ld hl,0xc002
+LD856:     set 0,(hl)
+LD858:     ld bc,0x0055
+LD85b:     call 0xd465
+LD85e:     set 1,(hl)
+LD860:     ret
+
+LD861:     ld bc,0x0000
+LD864:     ld hl,0xc000
+LD867:     bit 7,(hl)
+LD869:     jr z,0xd872
+LD86b:     dec bc
+LD86c:     ld a,b
+LD86d:     or c
+LD86e:     jr nz,0xd867
+LD870:     inc a
+LD871:     ret
+
+LD872:     bit 7,(hl)
+LD874:     jr z,0xd872
+LD876:     xor a
+LD877:     ld hl,0xc010
+LD87a:     ld (hl),0x03
+LD87c:     ld (hl),0x58
+LD87e:     ret
+
+LD87f:     ld hl,0xc002
+LD882:     ld a,(0xdb2b)
+LD885:     cp 0x2c
+LD887:     jr nc,0xd88c
+LD889:     set 6,(hl)
+LD88b:     ret
+
+LD88c:     res 6,(hl)
+LD88e:     ret
+
+										; suspect this might be data 
+LD88f:     inc b               ;04             
+LD890:     nop                 ;00             
+LD891:     dec d               ;15             
+LD892:     ld (bc),a           ;02             
+LD893:     ld h,0x04           ;26 04          
+LD895:     scf                 ;37             
+LD896:     ld b,0x48           ;06 48          
+LD898:     ex af,af'           ;08             
+LD899:     ld e,c              ;59             
+LD89a:     ld a,(bc)           ;0a             
+LD89b:     ld l,d              ;6a             
+LD89c:     inc c               ;0c             
+LD89d:     ld a,e              ;7b             
+LD89e:     ld c,0x8c           ;0e 8c          
+LD8a0:     djnz 0xd83f         ;10 9d          
+LD8a2:     ld (de),a           ;12             
+LD8a3:     xor (hl)            ;ae             
+LD8a4:     inc d               ;14             
+LD8a5:     cp a                ;bf             
+LD8a6:     ld d,0xd0           ;16 d0          
+LD8a8:     jr 0xd88b           ;18 e1          
+LD8aa:     ld a,(de)           ;1a             
+LD8ab:     jp p,0x031c         ;f2 1c 03       
+LD8ae:     rra                 ;1f             
+LD8af:     inc d               ;14             
+
+LD8b0:     ld hl,0xdde5
+LD8b3:     pop hl
+LD8b4:     ld b,0x06
+LD8b6:     push bc
+LD8b7:     call 0xd8bf
+LD8ba:     pop bc
+LD8bb:     ret z
+LD8bc:     djnz 0xd8b6
+LD8be:     ret
+
+LD8bf:     call 0xd8ec
+LD8c2:     ret nz
+LD8c3:     ld a,(ix+3)
+LD8c6:     call 0xda08
+LD8c9:     ret nz
+LD8ca:     jp 0xda70
+LD8cd:     push hl
+LD8ce:     call 0xdaa7
+LD8d1:     pop ix
+LD8d3:     ld b,0x02
+LD8d5:     push bc
+LD8d6:     call 0xd8de
+LD8d9:     pop bc
+LD8da:     ret z
+LD8db:     djnz 0xd8d5
+LD8dd:     ret
+
+LD8de:     call 0xd8ec
+LD8e1:     ret nz
+LD8e2:     ld a,(ix+3)
+LD8e5:     call 0xda19
+LD8e8:     ret nz
+LD8e9:     jp 0xdaf7
+LD8ec:     ld a,(ix+0)
+LD8ef:     call 0xd8fc
+LD8f2:     ret nz
+LD8f3:     ld l,(ix+1)
+LD8f6:     ld h,(ix+2)
+LD8f9:     jp 0xd93a
+LD8fc:     sub 0x04
+LD8fe:     cp 0x01
+LD900:     jr c,0xd906
+LD902:     ld a,0x1c
+LD904:     or a
+LD905:     ret
+
+LD906:     ld c,a
+LD907:     ld b,0x00
+LD909:     ld hl,0xdb36
+LD90c:     add hl,bc
+LD90d:     ld a,(hl)
+LD90e:     ld (0xdb40),a
+LD911:     xor a
+LD912:     ld hl,0xc280
+LD915:     ld e,(hl)
+LD916:     ld (0xc207),a
+LD919:     ld a,(0xdb40)
+LD91c:     ld e,(hl)
+LD91d:     ld (0xc202),a
+LD920:     ld hl,0xdb3a
+LD923:     add hl,bc
+LD924:     ld (0xdb3e),hl
+LD927:     ld hl,0xc202
+LD92a:     ld de,0x7530
+LD92d:     xor a
+LD92e:     bit 3,(hl)
+LD930:     ret z
+LD931:     dec de
+LD932:     ld a,d
+LD933:     or e
+LD934:     jr nz,0xd92d
+LD936:     ld a,0x14
+LD938:     or a
+LD939:     ret
+
+LD93a:     ld a,h
+LD93b:     cp 0x08
+LD93d:     jr c,0xd943
+LD93f:     ld a,0x2e
+LD941:     or a
+LD942:     ret
+
+LD943:     ld a,l
+LD944:     cp 0xca
+LD946:     jr c,0xd94c
+LD948:     ld a,0x2d
+LD94a:     or a
+LD94b:     ret
+
+LD94c:     push hl
+LD94d:     ld a,l
+LD94e:     call 0xd963
+LD951:     pop hl
+LD952:     jr nz,0xd960
+LD954:     ld a,h
+LD955:     ld hl,0xc280
+LD958:     ld e,(hl)
+LD959:     ld (0xc200),a
+LD95c:     call 0xd9de
+LD95f:     ret z
+LD960:     or 0x20
+LD962:     ret
+
+LD963:     ld b,a
+LD964:     ld hl,(0xdb3e)
+LD967:     ld a,(hl)
+LD968:     cp 0xff
+LD96a:     jr nz,0xd972
+LD96c:     push bc
+LD96d:     call 0xd995
+LD970:     pop bc
+LD971:     ret nz
+LD972:     sub b
+LD973:     ret z
+LD974:     jr nc,0xd978
+LD976:     neg
+LD978:     call 0xd9b4
+LD97b:     dec a
+LD97c:     jr nz,0xd978
+LD97e:     ld bc,0x2710
+LD981:     call 0xd9de
+LD984:     jr z,0xd98d
+LD986:     dec bc
+LD987:     ld a,b
+LD988:     or c
+LD989:     jr nz,0xd981
+LD98b:     jr 0xd9de
+LD98d:     ld bc,0x0d02
+LD990:     call 0xd465
+LD993:     xor a
+LD994:     ret
+
+LD995:     ld a,0xcc
+LD997:     scf
+LD998:     call 0xd9b4
+LD99b:     bit 1,(hl)
+LD99d:     jr z,0xd9ac
+LD99f:     dec a
+LD9a0:     or a
+LD9a1:     jr nz,0xd998
+LD9a3:     ld hl,(0xdb3e)
+LD9a6:     ld (hl),0xff
+LD9a8:     ld a,0x26
+LD9aa:     or a
+LD9ab:     ret
+
+LD9ac:     ld hl,(0xdb3e)
+LD9af:     ld (hl),0x00
+LD9b1:     jp 0xd9de
+LD9b4:     push af
+LD9b5:     ld hl,(0xdb3e)
+LD9b8:     ld a,(0xdb40)
+LD9bb:     ld c,a
+LD9bc:     dec (hl)
+LD9bd:     jr nc,0xd9c3
+LD9bf:     set 6,c
+LD9c1:     inc (hl)
+LD9c2:     inc (hl)
+LD9c3:     ld hl,0xc202
+LD9c6:     ld a,(0xc280)
+LD9c9:     ld (hl),c
+LD9ca:     set 5,c
+LD9cc:     ld a,(0xc280)
+LD9cf:     ld (hl),c
+LD9d0:     res 5,c
+LD9d2:     ld a,(0xc280)
+LD9d5:     ld (hl),c
+LD9d6:     ld bc,0x00b4
+LD9d9:     call 0xd465
+LD9dc:     pop af
+LD9dd:     ret
+
+LD9de:     ld a,(0xc202)
+LD9e1:     and 0x8d
+LD9e3:     xor 0x04
+LD9e5:     ret z
+LD9e6:     bit 7,a
+LD9e8:     jr nz,0xda05
+LD9ea:     bit 0,a
+LD9ec:     jr nz,0xda02
+LD9ee:     bit 3,a
+LD9f0:     jr nz,0xda05
+LD9f2:     ld a,(0xdb40)
+LD9f5:     set 4,a
+LD9f7:     push hl
+LD9f8:     ld hl,0xc280
+LD9fb:     ld h,(hl)
+LD9fc:     ld (0xc202),a
+LD9ff:     pop hl
+LDa00:     jr 0xd9de
+LDa02:     ld a,0x05
+LDa04:     ret
+
+LDa05:     ld a,0x04
+LDa07:     ret
+
+LDa08:     ld bc,0x0003
+LDa0b:     call 0xda2a
+LDa0e:     jr nz,0xda16
+LDa10:     ld a,0x80
+LDa12:     call 0xda51
+LDa15:     ret z
+LDa16:     or 0x30
+LDa18:     ret
+
+LDa19:     ld bc,0x0000
+LDa1c:     call 0xda2a
+LDa1f:     jr nz,0xda27
+LDa21:     ld a,0xc0
+LDa23:     call 0xda51
+LDa26:     ret z
+LDa27:     or 0x40
+LDa29:     ret
+
+LDa2a:     cp 0x11
+LDa2c:     jr c,0xda32
+LDa2e:     ld a,0x0f
+LDa30:     or a
+LDa31:     ret
+
+LDa32:     ld hl,0xd88f
+LDa35:     add a,a
+LDa36:     ld e,a
+LDa37:     ld d,0x00
+LDa39:     add hl,de
+LDa3a:     ld e,(hl)
+LDa3b:     inc hl
+LDa3c:     ld d,(hl)
+LDa3d:     ex de,hl
+LDa3e:     add hl,bc
+LDa3f:     ld a,(0xc280)
+LDa42:     ld (0xc203),hl
+LDa45:     ld bc,0x0211
+LDa48:     add hl,bc
+LDa49:     ld a,(0xc280)
+LDa4c:     ld (0xc205),hl
+LDa4f:     xor a
+LDa50:     ret
+
+LDa51:     ld hl,0xc207
+LDa54:     ld c,a
+LDa55:     ld a,(0xc280)
+LDa58:     ld (hl),c
+LDa59:     xor a
+LDa5a:     ld c,0xfa
+LDa5c:     bit 7,(hl)
+LDa5e:     ret z
+LDa5f:     ld bc,0x001e
+LDa62:     call 0xd465
+LDa65:     dec c
+LDa66:     jr nz,0xda5c
+LDa68:     ld a,(0xc280)
+LDa6b:     ld (hl),c
+LDa6c:     ld a,0x07
+LDa6e:     or a
+LDa6f:     ret
+
+LDa70:     call 0xdace
+LDa73:     cp (hl)
+LDa74:     ld a,0x38
+LDa76:     ret nz
+LDa77:     ld hl,0xe013
+LDa7a:     ld a,(ix+1)
+LDa7d:     cp (hl)
+LDa7e:     jr z,0xda88
+LDa80:     ld hl,(0xdb3e)
+LDa83:     ld (hl),0xff
+LDa85:     ld a,0x39
+LDa87:     ret
+
+LDa88:     ld a,(ix+2)
+LDa8b:     inc hl
+LDa8c:     cp (hl)
+LDa8d:     ld a,0x3a
+LDa8f:     ret nz
+LDa90:     ld a,(ix+3)
+LDa93:     inc hl
+LDa94:     cp (hl)
+LDa95:     ld a,0x3b
+LDa97:     ret nz
+LDa98:     call 0xdadb
+LDa9b:     ld a,e
+LDa9c:     cp (hl)
+LDa9d:     jr nz,0xdaa3
+LDa9f:     inc hl
+LDaa0:     ld a,d
+LDaa1:     xor (hl)
+LDaa2:     ret z
+LDaa3:     ld a,0x31
+LDaa5:     or a
+LDaa6:     ret
+
+LDaa7:     push hl
+LDaa8:     ld hl,0xe000
+LDaab:     ld de,0xe41a
+LDaae:     ld b,0x13
+LDab0:     xor a
+LDab1:     ld (hl),a
+LDab2:     ld (de),a
+LDab3:     inc de
+LDab4:     inc hl
+LDab5:     djnz 0xdab1
+LDab7:     inc a
+LDab8:     ld (0xe00f),a
+LDabb:     ld bc,0x0003
+LDabe:     pop de
+LDabf:     inc de
+LDac0:     ex de,hl
+LDac1:     ldir
+LDac3:     call 0xdace
+LDac6:     ld (hl),a
+LDac7:     call 0xdadb
+LDaca:     ld (hl),e
+LDacb:     inc hl
+LDacc:     ld (hl),d
+LDacd:     ret
+
+LDace:     ld hl,0xe010
+LDad1:     xor a
+LDad2:     ld a,(hl)
+LDad3:     ld b,0x06
+LDad5:     inc hl
+LDad6:     adc a,(hl)
+LDad7:     djnz 0xdad5
+LDad9:     inc hl
+LDada:     ret
+
+LDadb:     ld de,0xe018
+LDade:     ld hl,0x0000
+LDae1:     xor a
+LDae2:     ld b,0x04
+LDae4:     push bc
+LDae5:     ld b,0x00
+LDae7:     push bc
+LDae8:     ld a,(de)
+LDae9:     ld c,a
+LDaea:     ld b,0x00
+LDaec:     adc hl,bc
+LDaee:     inc de
+LDaef:     pop bc
+LDaf0:     djnz 0xdae7
+LDaf2:     pop bc
+LDaf3:     djnz 0xdae4
+LDaf5:     ex de,hl
+LDaf6:     ret
+
+LDaf7:     call 0xdb1c
+LDafa:     ldir
+LDafc:     push ix
+LDafe:     pop hl
+LDaff:     call 0xd8b1
+LDb02:     jr nz,0xdb12
+LDb04:     call 0xdb1c
+LDb07:     ld a,(de)
+LDb08:     cpi
+LDb0a:     jr nz,0xdb12
+LDb0c:     inc de
+LDb0d:     jp pe,0xdb07
+LDb10:     xor a
+LDb11:     ret
+
+LDb12:     call 0xdb1c
+LDb15:     ex de,hl
+LDb16:     ldir
+LDb18:     ld a,0x42
+LDb1a:     or a
+LDb1b:     ret
+
+LDb1c:     ld hl,0xe018
+LDb1f:     ld de,0xe480
+LDb22:     ld bc,0x0400
+LDb25:     ret
+
+LDb26     db                   15 58 00 0F FF FF 40 FF ;......CW.X....@.
+    db 00 FF 40 DF 00 DF 01 02 04 08 FF FF FF FF 3A DB ;..@...........:.
+    db 01 00 0F 00 21 00 0F 00 21 02 80 00 C5 E5 CD 1A ;....!...!.......
+    db FF 00 C1 00 46 4F 52 4D 41 54 20 20 43 4F 4D 00 ;....FORMAT  COM.
+    db 00 00 03 1E 00 00 00 00 00 00 00 00 00 00 00 00 ;................
+    db 00 00 00 00 4F 53 49 4C 4E 4B 53 20 41 53 4D 00 ;....OSILNKS ASM.
+    db 00 00 2E 1F 20 21 22 23 24 00 00 00 00 00 00 00 ;.... !"#$.......
+    db 00 00 00 00 57 46 42 49 4F 53 20 20 43 4F 4D 00 ;....WFBIOS  COM.
+    db 00 00 1E 25 26 27 28 00 00 00 00 00 00 00 00 00 ;...%&'(.........
+    db 00 00 00 00 45 44 20 20 20 20 20 20 43 4F 4D 00 ;....ED      COM.
+    db 00 00 34 29 2A 2B 2C 2D 2E 2F 00 00 00 00 00 00 ;..4)*+,-./......
+    db 00 00 00 FF FF FF FF FF FF FF FF 00 00 00 00 00 ;................
+    db 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ;................
+    db 00 70 9A 55 65 DC 80 80 80 80 80 80 80 80 80 80 ;.p.Ue...........
+    db 80 23 C4 A6 E7 AF FD EE E7 EF 6C 97 D3 6F C8 83 ;.#........l..o..
+    db 90 08 10 84 F3 EB 7B 33 FF F2 EE D5 B0 D2 04 AA ;......{3........
+    db 00 10 9D 04 DD F6 CF FB 2F FF B7 EE 6C 60 55 5A ;......../...l`UZ
+    db 98 29 68 C0 F2 FF 76 EF F2 92 7F BF 49 65 40 AB ;.)h...v.....Ie@.
+    db 04 22 1A 89 AB F3 75 7F 6A 35 64 2F 20 46 82 96 ;."....u.j5d/ F..
+    db 51 03 1A A8 BE BF F3 3F 9F B8 FA BA 61 E0 1A 6B ;Q......?....a..k
+    db AC C1 A0 03 FA FB 77 EC 72 A7 AB C7 05 35 04 40 ;......w.r....5.@
+    db 72 20 44 BA FE 97 DD E9 59 ED 6F AA 84 11 03 C7 ;r D.....Y.o.....
+    db 50 20 52 88 FF 9E FB FB AF 0A B3 B3 48 40 55 6B ;P R.........H@Uk
+    db 42 50 40 58 F8 AD DB FE 67 FD 15 B7 0A 80 2E 24 ;BP@X....g......$
+    db 41 37 10 30 3E EF A2 A7 31 B3 DB D9 02 36 CE 95 ;A7.0>...1....6..
+    db 30 44 42 41 4A FE BD 7E 6E BE D4 3F E1 03 AA A0 ;0DBAJ..~n..?....
+    db 00 36 40 4B D7 9A 37 AF 9B 78 F3 3F 1D 88 65 A3 ;.6@K..7..x.?..e.
+    db 31 12 11 38 AB EE 1F EF 58 AF F7 AF 04 A6 03 62 ;1..8....X......b
+    db 24 40 46 15 EF 3F F6 BF 32 A5 1F 57 00 08 15 E8 ;$@F..?..2..W....
+    db CC 52 80 50 DD BF FD EE B7 EF B4 2D E0 6A 28 02 ;.R.P.......-.j(.
+    db 22 44 11 20 65 E7 FB EC C7 FB 74 77 D2 1E C6 6B ;"D. e.....tw...k
+    db 00 84 34 C1 72 DC 62 FE FC 33 BE 9F C1 A6 04 49 ;..4.r.b..3.....I
+    db F0 60 51 00 FD FB 7A FA 73 B5 D2 C7 25 4A 34 24 ;.`Q...z.s...%J4$
+    db 89 54 9D 12 FF D5 93 7B 8B 68 AD 7A 65 C1 86 32 ;.T.....{.h.ze..2
+    db 72 6F B0 B2 BF FB DE BB F7 FA CD 27 12 80 38 7E ;ro.........'..8~
+    db 70 69 48 40 FE BC A7 FF F3 EF 3B D1 A0 E0 25 28 ;piH@......;...%(
+    db 0A 83 30 21 C2 7E FD 7B FE EF BE EF F3 7C 30 B0 ;..0!.~.{.....|0.
+    db E0 C3 C0 45 F7 E7 F7 FF 71 64 FE 0D 25 C0 29 4A ;...E....qd..%.)J
+    db 0C EC 40 00 AE 7F FB FF 7C FF 6F A1 15 D6 03 CA ;..@.....|.o.....
+    db A2 70 10 20 EF 7F BB BF CD 5F FF 7F 38 21 0A B6 ;.p. ....._..8!..
+    db 0A C0 D0 24 DA AB EB BF FE DC C7 5D 28 40 97 5E ;...$.......](@.^
+    db 01 44 44 B5 F6 FF 6F EB D7 8B 56 FD 10 23 51 30 ;.DD...o...V..#Q0
+    db 73 79 D5 00 DF BF DB EF 6E 88 D7 CB 68 01 DD 27 ;sy......n...h..'
+    db A4 AA F6 73 BB AB D5 BB 37 BD BB F7 81 38 21 EB ;...s....7....8!.
+    db C5 61 66 46 DA EB BB FB C4 BE B6 5F 94 45 6C A9 ;.afF......._.El.
+    db FA 29 11 4C FF D3 B5 EF 73 FB C5 2B 22 04 89 EA ;.).L....s..+"...
+
+
