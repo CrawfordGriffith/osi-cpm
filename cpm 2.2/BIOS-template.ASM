@@ -1,6 +1,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;OSICPMDBIOA.ASM -- CP/M 2.2 BIOS for OSI Challenger III
+;OSICPMDBIOS.ASM -- CP/M 2.2 BIOS for OSI Challenger III
 ;Dissassembled from binaries  
 ;
 ;Comments / Framework taken from GW sbc BIOS
@@ -25,8 +25,8 @@ MSIZE   equ     49              ;Value specified to MOVCPM (memory in KB)
 BIAS    equ     (MSIZE-20)*1024 ;CCP bias factor = 7400H
 CCP     equ     3400H+BIAS      ;Base of CCP  - starts at A800
 BDOS    equ     CCP-800H        ;Base of BDOS - starts at A000
-BIOS    equ     CCP+1600H       ;Base of BIOS - THIS BIOS starts at D000, serial BIOS is at BE000
-BIOSORG	equ		D000H
+BIOS    equ     CCP+1600H       ;Base of BIOS - serial BIOS is at BE00
+BIOSORG	equ		D000H			;THIS BIOS starts at D000, 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;CP/M zero page memory locations
@@ -130,42 +130,43 @@ DSK0:
 		dw		0010H			;
         dw		000CH			; Scratch - 3 words
 		dw		0138H 			;
-		dw		DB53H			; DIRBUF - Directory Buffer location (same for all disks)
-		dw		D0BCH			; *DPB - disk parameter bloc location (shared for sililar drives)
-		dw		DBF1H			; CSV - disk change scratch location (unique)
-		dw		DBD3H 			; ALV - disk storage allocation scratch location (unique)
+		dw		DIRBF			; DIRBUF - Directory Buffer location (same for all disks)
+		dw		DPB0			; *DPB - disk parameter bloc location (shared for similar drives)
+		dw		CSV0			; CSV - disk change scratch location (unique)
+		dw		ALV0 			; ALV - disk storage allocation scratch location (unique)
 
 DSK1:		
 		dw		D0F4H			; *XLT = translation routine (shared with identical drives) 0000 = no translate
 		dw		0000H			;
         dw		0000H			; Scratch - 3 words
 		dw		0000H 			;
-		dw		DB53H			; DIRBUF - Directory Buffer location (same for all disks)
-		dw		D0E5H			; *DPB - disk parameter bloc location (shared for similar drives)
-		dw		DC1FH			; CSV - disk change scratch location (unique)
-		dw		DC01H 			; ALV - disk storage allocation scratch location (unique)
+		dw		DIRBF			; DIRBUF - Directory Buffer location (same for all disks)
+		dw		DPB1			; *DPB - disk parameter bloc location (shared for similar drives)
+		dw		CSV1			; CSV - disk change scratch location (unique)
+		dw		ALV1 			; ALV - disk storage allocation scratch location (unique)
 
 DSK2:		
 		dw		D11DH			; *XLT = translation routine (shared with identical drives) 0000 = no translate
 		dw		0000H			;
         dw		0000H			; Scratch - 3 words
 		dw		0000H 			;
-		dw		DB53H			; DIRBUF - Directory Buffer location (same for all disks)
-		dw		D10EH			; *DPB - disk parameter bloc location (shared for sililar drives)
-		dw		DC4DH			; CSV - disk change scratch location (unique)
-		dw		DC2FH 			; ALV - disk storage allocation scratch location (unique)
+		dw		DIRBF			; DIRBUF - Directory Buffer location (same for all disks)
+		dw		DPB2			; *DPB - disk parameter bloc location (shared for similar drives)
+		dw		CSV2			; CSV - disk change scratch location (unique)
+		dw		ALV2 			; ALV - disk storage allocation scratch location (unique)
   
 DSK3:		
 		dw		D146H			; *XLT = translation routine (shared with identical drives) 0000 = no translate
 		dw		0000H			;
         dw		0000H			; Scratch - 3 words
 		dw		0000H 			;
-		dw		DB53H			; DIRBUF - Directory Buffer location (same for all disks)
-		dw		D137H			; DPB - disk parameter bloc location (shared for sililar drives)
-		dw		DC7BH			; CSV - disk change scratch location (unique)
-		dw		DC5DH 			; ALV - disk storage allocation scratch location (unique)
+		dw		DIRBF			; DIRBUF - Directory Buffer location (same for all disks)
+		dw		DPB3			; DPB - disk parameter bloc location (shared for similar drives)
+		dw		CSV3			; CSV - disk change scratch location (unique)
+		dw		ALV3 			; ALV - disk storage allocation scratch location (unique)
 
  
+; Suspect these are spare disk parameter blocks (why?)
 D07C  00 00 00 00 ....S.7.{.].....
 D080 00 00 00 00 53 DB 60 D1 61 DD 8B DC 00 00 00 00 ....S.`.a.......
 D090 00 00 00 00 53 DB 6F D1 38 DE 61 DD 00 00 00 00 ....S.o.8.a.....
@@ -183,8 +184,8 @@ D0B0 00 00 00 00 53 DB 8D D1 E6 DF 0F DF
 ;See the CP/M Alteration Guide for an explanation of what
 ;each field represents.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-LD0BC:
 DPBLK:  
+DPB0:
 		dw      001AH           ;Sectors per track (SPT) = 26
         db      03H             ;Block shift factor (BSH) - 4K blocks
         db      07H             ;Block mask (BLM) - 4K blocks - 3 bits
@@ -200,7 +201,7 @@ DPBLK:
 ; DOCB - start ot XLAT for DSK0
 LD0CB:	db 	01 07 0D 13 19 05 0B 11 17 03 09 0F 15 02 08 0E 14 1A 06 0C 12 18 04 0A 10 16 
 
-LD0E5:	; - start of Disk parameter block for DSK1
+DPB1:	; - start of Disk parameter block for DSK1
 		dw      001AH           ;Sectors per track (SPT) = 26
         db      03H             ;Block shift factor (BSH) - 4K blocks
         db      07H             ;Block mask (BLM) - 4K blocks - 3 bits
@@ -217,7 +218,7 @@ LD0F4:	db 	01 07 0D 13 19 05 0B 11 17 03 09 0F 15 02 08 0E 14 1A 06 0C 12 18 04 
 
 
 ;D10EH - DSK2 parameter Block
-LD10E:
+DPB2:
 		dw      001AH           ;Sectors per track (SPT) = 26
         db      03H             ;Block shift factor (BSH) - 4K blocks
         db      07H             ;Block mask (BLM) - 4K blocks - 3 bits
@@ -234,7 +235,7 @@ LD11D:	db 	01 07 0D 13 19 05 0B 11 17 03 09 0F 15 02 08 0E 14 1A 06 0C 12 18 04 
 
 
 ; LD137H - Disk Parameter block for DSK3
-LD137:
+DPB3:
 		dw      001AH           ;Sectors per track (SPT) = 26
         db      03H             ;Block shift factor (BSH) - 4K blocks
         db      07H             ;Block mask (BLM) - 4K blocks - 3 bits
@@ -249,6 +250,7 @@ LD137:
 ; D146H - XLAT for DSK3
 LD146:	db 	01 07 0D 13 19 05 0B 11 17 03 09 0F 15 02 08 0E 14 1A 06 0C 12 18 04 0A 10 16
 
+; More data - disk?
 D160 88 00 05 1F 01 AF 06 FF 03 FF 00 00 00 01 00 88 
 D170 00 05 1F 01 B4 06 FF 03 FF 00 00 00 94 01 88 00 
 D180 05 1F 01 B4 06 FF 03 FF 00 00 00 28 03 88 00 05 
@@ -270,7 +272,7 @@ CBOOT:
 		ld (0x0004),a
 		ld (0xdb50),a
 		call 0xd241
-		call 0xbe00
+		call BIOS
 		ld hl,Ld1b9
 		call 0xd303
 		jr Ld218
@@ -413,89 +415,6 @@ LD316:     inc hl
 LD317:     ld (hl),c
 LD318:     ret
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;GOCPM -- Common code before entering CP/M's CCP
-;
-;After execution of this routine, the data in HSTBUF will
-;be lost. This includes:
-;
-; * SOMSG$
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;GOCPM:  
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; I/O Routines for IOBYTE Vectored Devices
-;
-; These routines deal with IOBYTE vectored devices. By
-; default, these are not implemented and fall through
-; to the console routines. With the default IOBYTE
-; implementation, everything uses the TTY.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;LISTST -- Get list device status
-;
-;This is currently not implemented and falls through to
-;CONST.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;LISTST:
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;CONST -- Get the console status for the selected IOBYTE
-;         device
-;
-;pre: I/O devices are already initialized
-;pre: IOBYTE is at 0x0003 and initialized
-;post: status check is handed off to selected device
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;CONST:  
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;READER -- Get a byte from the reader device
-;
-;This is currently not implemented and falls through to
-;CONIN.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;READER:
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;CONIN -- Get a byte from the console device selected by
-;         the current IOBYTE
-;
-;pre: I/O devices are already initialized
-;pre: IOBYTE is at 0x0003 and initialized
-;post: data request is handed off to selected device
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;CONIN:  
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;LIST -- Send a byte to the list device
-;
-;This is not currently implemented and falls through to
-;CONOUT.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;LIST:
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;LIST -- Send a byte to the list device
-;
-;This is not currently implemented and falls through to
-;CONOUT.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;PUNCH:
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;CONOUT -- Send a byte to the console device selected by
-;         the current IOBYTE
-;
-;pre: I/O devices are already initialized
-;pre: IOBYTE is at 0x0003 and initialized
-;post: data request is handed off to selected device
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;CONOUT: 
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -520,7 +439,6 @@ LD318:     ret
 ;post: HL contains DPH address for drive on success
 ;post: HL contains 0 on error
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-SELDSK: 
 SELDSK:
 LD319:     ld hl,0x0000
 LD31c:     ld a,c
@@ -548,8 +466,7 @@ LD336:     ret
 ;Passes off to SETTRK.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 HOME:
-LD337:     ld bc,0x0000
-
+			ld bc,0x0000
 
 
 
@@ -1567,17 +1484,6 @@ SIGNON:
 STROUT: 
 ;-----------------------------------------------------------------------------------------------START PASTE
 
-
-
-
-
-
-
-
-
-
-
-
 										; suspect this might be data 
 LD88f:     inc b               ;04             
 LD890:     nop                 ;00             
@@ -1979,53 +1885,63 @@ LDb22:     ld bc,0x0400
 LDb25:     ret
 
 LDb26     db                   15 58 00 0F FF FF 40 FF ;......CW.X....@.
-    db 00 FF 40 DF 00 DF 01 02 04 08 FF FF FF FF 3A DB ;..@...........:.
-    db 01 00 0F 00 21 00 0F 00 21 02 80 00 C5 E5 CD 1A ;....!...!.......
-    db FF 00 C1 00 46 4F 52 4D 41 54 20 20 43 4F 4D 00 ;....FORMAT  COM.
-    db 00 00 03 1E 00 00 00 00 00 00 00 00 00 00 00 00 ;................
-    db 00 00 00 00 4F 53 49 4C 4E 4B 53 20 41 53 4D 00 ;....OSILNKS ASM.
-    db 00 00 2E 1F 20 21 22 23 24 00 00 00 00 00 00 00 ;.... !"#$.......
-    db 00 00 00 00 57 46 42 49 4F 53 20 20 43 4F 4D 00 ;....WFBIOS  COM.
-    db 00 00 1E 25 26 27 28 00 00 00 00 00 00 00 00 00 ;...%&'(.........
-    db 00 00 00 00 45 44 20 20 20 20 20 20 43 4F 4D 00 ;....ED      COM.
-    db 00 00 34 29 2A 2B 2C 2D 2E 2F 00 00 00 00 00 00 ;..4)*+,-./......
-    db 00 00 00 FF FF FF FF FF FF FF FF 00 00 00 00 00 ;................
-    db 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ;................
-    db 00 70 9A 55 65 DC 80 80 80 80 80 80 80 80 80 80 ;.p.Ue...........
-    db 80 23 C4 A6 E7 AF FD EE E7 EF 6C 97 D3 6F C8 83 ;.#........l..o..
-    db 90 08 10 84 F3 EB 7B 33 FF F2 EE D5 B0 D2 04 AA ;......{3........
-    db 00 10 9D 04 DD F6 CF FB 2F FF B7 EE 6C 60 55 5A ;......../...l`UZ
-    db 98 29 68 C0 F2 FF 76 EF F2 92 7F BF 49 65 40 AB ;.)h...v.....Ie@.
-    db 04 22 1A 89 AB F3 75 7F 6A 35 64 2F 20 46 82 96 ;."....u.j5d/ F..
-    db 51 03 1A A8 BE BF F3 3F 9F B8 FA BA 61 E0 1A 6B ;Q......?....a..k
-    db AC C1 A0 03 FA FB 77 EC 72 A7 AB C7 05 35 04 40 ;......w.r....5.@
-    db 72 20 44 BA FE 97 DD E9 59 ED 6F AA 84 11 03 C7 ;r D.....Y.o.....
-    db 50 20 52 88 FF 9E FB FB AF 0A B3 B3 48 40 55 6B ;P R.........H@Uk
-    db 42 50 40 58 F8 AD DB FE 67 FD 15 B7 0A 80 2E 24 ;BP@X....g......$
-    db 41 37 10 30 3E EF A2 A7 31 B3 DB D9 02 36 CE 95 ;A7.0>...1....6..
-    db 30 44 42 41 4A FE BD 7E 6E BE D4 3F E1 03 AA A0 ;0DBAJ..~n..?....
-    db 00 36 40 4B D7 9A 37 AF 9B 78 F3 3F 1D 88 65 A3 ;.6@K..7..x.?..e.
-    db 31 12 11 38 AB EE 1F EF 58 AF F7 AF 04 A6 03 62 ;1..8....X......b
-    db 24 40 46 15 EF 3F F6 BF 32 A5 1F 57 00 08 15 E8 ;$@F..?..2..W....
-    db CC 52 80 50 DD BF FD EE B7 EF B4 2D E0 6A 28 02 ;.R.P.......-.j(.
-    db 22 44 11 20 65 E7 FB EC C7 FB 74 77 D2 1E C6 6B ;"D. e.....tw...k
-    db 00 84 34 C1 72 DC 62 FE FC 33 BE 9F C1 A6 04 49 ;..4.r.b..3.....I
-    db F0 60 51 00 FD FB 7A FA 73 B5 D2 C7 25 4A 34 24 ;.`Q...z.s...%J4$
-    db 89 54 9D 12 FF D5 93 7B 8B 68 AD 7A 65 C1 86 32 ;.T.....{.h.ze..2
-    db 72 6F B0 B2 BF FB DE BB F7 FA CD 27 12 80 38 7E ;ro.........'..8~
-    db 70 69 48 40 FE BC A7 FF F3 EF 3B D1 A0 E0 25 28 ;piH@......;...%(
-    db 0A 83 30 21 C2 7E FD 7B FE EF BE EF F3 7C 30 B0 ;..0!.~.{.....|0.
-    db E0 C3 C0 45 F7 E7 F7 FF 71 64 FE 0D 25 C0 29 4A ;...E....qd..%.)J
-    db 0C EC 40 00 AE 7F FB FF 7C FF 6F A1 15 D6 03 CA ;..@.....|.o.....
-    db A2 70 10 20 EF 7F BB BF CD 5F FF 7F 38 21 0A B6 ;.p. ....._..8!..
-    db 0A C0 D0 24 DA AB EB BF FE DC C7 5D 28 40 97 5E ;...$.......](@.^
-    db 01 44 44 B5 F6 FF 6F EB D7 8B 56 FD 10 23 51 30 ;.DD...o...V..#Q0
-    db 73 79 D5 00 DF BF DB EF 6E 88 D7 CB 68 01 DD 27 ;sy......n...h..'
-    db A4 AA F6 73 BB AB D5 BB 37 BD BB F7 81 38 21 EB ;...s....7....8!.
-    db C5 61 66 46 DA EB BB FB C4 BE B6 5F 94 45 6C A9 ;.afF......._.El.
-    db FA 29 11 4C FF D3 B5 EF 73 FB C5 2B 22 04 89 EA ;.).L....s..+"...
+
+DB26                         15 58 00 0F FF FF 40 FF ......CW.X....@.
+DB30 00 FF 40 DF 00 DF 01 02 04 08 FF FF FF FF 3A DB ..@...........:.
+DB40 01 00 0F 00 21 00 0F 00 21 02 80 00 C5 E5 CD 1A ....!...!.......
+DB50 FF 00 C1 
+
+LDB53: 
+DIRBF:  ds      128             ;Scratch directory area
 
 
+ALV0:
+     db FF FF FF FF FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+CSV0:
+	 db 70 9A 55 65 DC 80 80 80 80 80 80 80 80 80 80 80 
+
+ALV1: 
+     db 23 C4 A6 E7 AF FD EE E7 EF 6C 97 D3 6F C8 83 90 08 10 84 F3 EB 7B 33 FF F2 EE D5 B0 D2 04 
+CSV1: 
+	 db AA 00 10 9D 04 DD F6 CF FB 2F FF B7 EE 6C 60 55 
+
+ALV2:
+	 db 5A 98 29 68 C0 F2 FF 76 EF F2 92 7F BF 49 65 40 AB 04 22 1A 89 AB F3 75 7F 6A 35 64 2F 20 
+CSV2: 
+	 db 46 82 96 51 03 1A A8 BE BF F3 3F 9F B8 FA BA 61 
+
+ALV3:		
+     db E0 1A 6B AC C1 A0 03 FA FB 77 EC 72 A7 AB C7 05 35 04 40 72 20 44 BA FE 97 DD E9 59 ED 6F 
+	 ; note that the ALV3 was 2 bytes too long on first edit - check
+CSV3:
+	 db AA 84 11 03 C7 50 20 52 88 FF 9E FB FB AF 0A B3
+
+
+DC8B B3 48 40 55 6B 
+DC90 42 50 40 58 F8 AD DB FE 67 FD 15 B7 0A 80 2E 24 BP@X....g......$
+DCA0 41 37 10 30 3E EF A2 A7 31 B3 DB D9 02 36 CE 95 A7.0>...1....6..
+DCB0 30 44 42 41 4A FE BD 7E 6E BE D4 3F E1 03 AA A0 0DBAJ..~n..?....
+DCC0 00 36 40 4B D7 9A 37 AF 9B 78 F3 3F 1D 88 65 A3 .6@K..7..x.?..e.
+DCD0 31 12 11 38 AB EE 1F EF 58 AF F7 AF 04 A6 03 62 1..8....X......b
+DCE0 24 40 46 15 EF 3F F6 BF 32 A5 1F 57 00 08 15 E8 $@F..?..2..W....
+DCF0 CC 52 80 50 DD BF FD EE B7 EF B4 2D E0 6A 28 02 .R.P.......-.j(.
+DD00 22 44 11 20 65 E7 FB EC C7 FB 74 77 D2 1E C6 6B "D. e.....tw...k
+DD10 00 84 34 C1 72 DC 62 FE FC 33 BE 9F C1 A6 04 49 ..4.r.b..3.....I
+DD20 F0 60 51 00 FD FB 7A FA 73 B5 D2 C7 25 4A 34 24 .`Q...z.s...%J4$
+DD30 89 54 9D 12 FF D5 93 7B 8B 68 AD 7A 65 C1 86 32 .T.....{.h.ze..2
+DD40 72 6F B0 B2 BF FB DE BB F7 FA CD 27 12 80 38 7E ro.........'..8~
+DD50 70 69 48 40 FE BC A7 FF F3 EF 3B D1 A0 E0 25 28 piH@......;...%(
+DD60 0A 83 30 21 C2 7E FD 7B FE EF BE EF F3 7C 30 B0 ..0!.~.{.....|0.
+DD70 E0 C3 C0 45 F7 E7 F7 FF 71 64 FE 0D 25 C0 29 4A ...E....qd..%.)J
+DD80 0C EC 40 00 AE 7F FB FF 7C FF 6F A1 15 D6 03 CA ..@.....|.o.....
+DD90 A2 70 10 20 EF 7F BB BF CD 5F FF 7F 38 21 0A B6 .p. ....._..8!..
+DDA0 0A C0 D0 24 DA AB EB BF FE DC C7 5D 28 40 97 5E ...$.......](@.^
+DDB0 01 44 44 B5 F6 FF 6F EB D7 8B 56 FD 10 23 51 30 .DD...o...V..#Q0
+DDC0 73 79 D5 00 DF BF DB EF 6E 88 D7 CB 68 01 DD 27 sy......n...h..'
+DDD0 A4 AA F6 73 BB AB D5 BB 37 BD BB F7 81 38 21 EB ...s....7....8!.
+DDE0 C5 61 66 46 DA EB BB FB C4 BE B6 5F 94 45 6C A9 .afF......._.El.
+DDF0 FA 29 11 4C FF D3 B5 EF 73 FB C5 2B 22 04 89 EA .).L....s..+"...
 
 
 
@@ -2057,7 +1973,7 @@ DMAADD: ds      2               ;Current DMA address
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 BEGDAT  equ     $               ;Beginning of data area
 
-DIRBF:  ds      128             ;Scratch directory area
+
 ALL00:  ds      257             ;Allocation vector 0
 
 ENDDAT  equ     $
@@ -2075,17 +1991,6 @@ DATSIZ  equ     ENDDAT-BEGDAT
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 HSTBUF:
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;Disposable String Constants/Data
-;
-;The data contained in the next 512 bytes will be
-;overwritten by HSTBUF on the first DSK interface access.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-SOMSG$: db CR, LF, LF, 'Digital Research 64K CP/M 2.2 '
-        db CR, LF, 'GW-GLITCHBUS-DSK1 BIOS'
-        db CR, LF, LF, 'Glitch Works release 0.1'
-        db CR, LF, 'http://www.glitchwrks.com/'
-        db CR, LF, 00H
 
 DDEND   equ     $
 
@@ -2093,5 +1998,90 @@ DDEND   equ     $
 ;HSTPAD -- Pad out HSTBUF to 512 bytes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 HSTPAD: ds      (512 - (DDEND - HSTBUF))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;GOCPM -- Common code before entering CP/M's CCP
+;
+;After execution of this routine, the data in HSTBUF will
+;be lost. This includes:
+;
+; * SOMSG$
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;GOCPM:  
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; I/O Routines for IOBYTE Vectored Devices
+;
+; These routines deal with IOBYTE vectored devices. By
+; default, these are not implemented and fall through
+; to the console routines. With the default IOBYTE
+; implementation, everything uses the TTY.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;LISTST -- Get list device status
+;
+;This is currently not implemented and falls through to
+;CONST.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;LISTST:
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;CONST -- Get the console status for the selected IOBYTE
+;         device
+;
+;pre: I/O devices are already initialized
+;pre: IOBYTE is at 0x0003 and initialized
+;post: status check is handed off to selected device
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;CONST:  
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;READER -- Get a byte from the reader device
+;
+;This is currently not implemented and falls through to
+;CONIN.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;READER:
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;CONIN -- Get a byte from the console device selected by
+;         the current IOBYTE
+;
+;pre: I/O devices are already initialized
+;pre: IOBYTE is at 0x0003 and initialized
+;post: data request is handed off to selected device
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;CONIN:  
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;LIST -- Send a byte to the list device
+;
+;This is not currently implemented and falls through to
+;CONOUT.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;LIST:
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;LIST -- Send a byte to the list device
+;
+;This is not currently implemented and falls through to
+;CONOUT.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;PUNCH:
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;CONOUT -- Send a byte to the console device selected by
+;         the current IOBYTE
+;
+;pre: I/O devices are already initialized
+;pre: IOBYTE is at 0x0003 and initialized
+;post: data request is handed off to selected device
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;CONOUT: 
+
+
 
         END
